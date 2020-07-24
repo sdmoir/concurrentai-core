@@ -1,0 +1,4 @@
+#!/bin/bash
+docker build api -t registry.digitalocean.com/concurrent-ai/rendezvous-service-poc-api:latest
+docker push registry.digitalocean.com/concurrent-ai/rendezvous-service-poc-api:latest
+kubectl set image deployment/rendezvous-service rendezvous-api=registry.digitalocean.com/concurrent-ai/rendezvous-service-poc-api

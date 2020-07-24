@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "extra_config": {
+    "github_com/devopsfaith/krakend-gologging": {
+      "level": "DEBUG",
+      "stdout": true
+    }
+  },
+  "timeout": "5000ms",
+  "cache_ttl": "300s",
+  "output_encoding": "json",
+  "name": "Concurrent",
+  "endpoints": [
+    {
+      "endpoint": "/test-1",
+      "method": "GET",
+      "extra_config": {
+        "github.com/devopsfaith/krakend/proxy": {
+          "static": {
+            "strategy": "incomplete",
+            "data": {
+              "error": "Request could not be completed"
+            }
+          }
+        }
+      },
+      "output_encoding": "json",
+      "concurrent_calls": 1,
+      "backend": [
+        {
+          "host": ["http://api:9000/"]
+        }
+      ]
+    }
+  ]
+}
