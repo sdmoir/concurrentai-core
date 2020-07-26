@@ -2,8 +2,10 @@ import * as pulumi from "@pulumi/pulumi";
 import { InfraConfig } from "../src/config";
 
 const mockConfig: InfraConfig = {
+  digitalocean: {
+    registryToken: "testRegistryToken",
+  },
   kafka: {
-    clientId: "testKafkaClientId",
     brokers: "testKafkaBrokers",
     apiKey: "testKafkaApiKey",
     apiSecret: "testKafkaApiSecret",
@@ -57,7 +59,7 @@ describe("Infrastructure", function () {
 
   describe("rendezvous-gateway", function () {
     it("should deploy a krakend container", function (done) {
-      const { spec } = infra.gateway.deployment.spec.template;
+      const { spec } = infra.gateway.deployment.deployment.spec.template;
       pulumi.all([spec.containers]).apply(([containers]) => {
         if (!containers.find((container) => container.name === "krakend")) {
           done(

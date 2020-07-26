@@ -1,0 +1,16 @@
+{
+  "organizationId": "concurrent",
+  "services": [
+    {
+      "id": "wine",
+      "businessTopic": "business-objective-1",
+      "collectionTopic": "business-objective-1",
+      "models": [
+        {
+          "id": "latest",
+          "image": "registry.digitalocean.com/concurrent-ai/demo-models:sklearn_elasticnet_wine_latest"
+        }
+      ]
+    }
+  ]
+}

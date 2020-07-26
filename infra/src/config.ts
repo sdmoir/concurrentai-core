@@ -1,7 +1,10 @@
 import * as pulumi from "@pulumi/pulumi";
 
+interface DigitalOceanConfig {
+  registryToken: string;
+}
+
 interface KafkaConfig {
-  clientId: string;
   brokers: string;
   apiKey: string;
   apiSecret: string;
@@ -25,6 +28,7 @@ export interface RendezvousConfig {
 }
 
 export interface InfraConfig {
+  digitalocean: DigitalOceanConfig;
   kafka: KafkaConfig;
   rendezvous: RendezvousConfig;
 }
@@ -32,6 +36,7 @@ export interface InfraConfig {
 const config = new pulumi.Config();
 
 const infraConfig: InfraConfig = {
+  digitalocean: config.requireObject<DigitalOceanConfig>("digitalocean"),
   kafka: config.requireObject<KafkaConfig>("kafka"),
   rendezvous: config.requireObject<RendezvousConfig>("rendezvous"),
 };

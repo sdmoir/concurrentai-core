@@ -1,5 +1,6 @@
 {
   "name": "rendezvous",
+  "main": "src/index.ts",
   "scripts": {
     "test": "jest"
   },

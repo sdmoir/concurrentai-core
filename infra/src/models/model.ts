@@ -1,11 +1,10 @@
 import * as k8s from "@pulumi/kubernetes";
-import { ModelConfig, InfraConfig } from "../config";
-import { DeployableService } from "./types";
 
-export function createModelService(
-  config: InfraConfig,
-  modelConfig: ModelConfig
-): DeployableService {
+import { ModelConfig } from "../config";
+import { provider } from "../cluster/provider";
+import { secret as registrySecret } from "../cluster/registry";
+
+export function createModelService(modelConfig: ModelConfig) {
   const metadata = { name: `rendezvous-model-${modelConfig.id}` };
   const appLabels = { run: `rendezvous-model-${modelConfig.id}` };
 
@@ -22,12 +21,22 @@ export function createModelService(
             containers: [
               {
                 name: "model",
+                ports: [{ containerPort: 8080 }],
                 image: modelConfig.image,
+                imagePullPolicy: "Always",
+              },
+            ],
+            imagePullSecrets: [
+              {
+                name: registrySecret.metadata.name,
               },
             ],
           },
         },
       },
+    },
+    {
+      provider,
     }
   );
 
@@ -39,6 +48,9 @@ export function createModelService(
         ports: [{ port: 80, targetPort: 8080 }],
         selector: appLabels,
       },
+    },
+    {
+      provider,
     }
   );
 

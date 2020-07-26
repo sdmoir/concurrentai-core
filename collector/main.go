@@ -42,7 +42,9 @@ func getModelResponse(message *kafka.Message) []byte {
 
 	requestBody, _ := json.Marshal(messageValue)
 
-	response, err := http.Post("http://model:8080/invocations", "application/json", bytes.NewBuffer(requestBody))
+	modelEndpoint := os.Getenv("MODEL_ENDPOINT")
+
+	response, err := http.Post(modelEndpoint, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		log.Fatal(err)
 	}
