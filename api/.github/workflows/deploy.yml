@@ -1,0 +1,102 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-push:
+    name: Build and push
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service:
+          - api
+          - collector
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Registry login
+        run: doctl registry login --access-token "$ACCESS_TOKEN"
+        env:
+          ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Build and tag
+        run: |
+          docker build ${{ matrix.service }} \
+              -t registry.digitalocean.com/concurrent-ai/rendezvous-${{ matrix.service }}:latest
+
+      - name: Push
+        run: |
+          docker push registry.digitalocean.com/concurrent-ai/rendezvous-${{ matrix.service }}:latest
+
+  get-stacks:
+    name: Get rendezvous stacks
+    needs: build-and-push
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Pulumi CLI
+        uses: pulumi/action-install-pulumi-cli@releases/v1
+
+      - name: Install jq
+        run: |
+          apt-get install -y jq
+
+      - id: list-stacks
+        name: List stacks to deploy
+        run: |
+          stacks=$(pulumi stack ls | grep -o "rendezvous\/[a-zA-Z0-9]\+\$" | sed "s/rendezvous\///g" | jq '. | split("\n") | map(select(length > 0)) | {stack: .}' -Rsc)
+          echo "::set-output name=matrix::$stacks"
+
+    outputs:
+      matrix: ${{ steps.list-stacks.outputs.matrix }}
+
+  deploy:
+    name: Deploy
+    needs: get-stacks
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix: ${{ fromJson(needs.get-stacks.outputs.matrix) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Download Kubernetes config
+        run: |
+          doctl kubernetes cluster kubeconfig save ${{ secrets.DIGITALOCEAN_KUBERNETES_CLUSTER }}
+
+      - name: Install Pulumi CLI
+        uses: pulumi/action-install-pulumi-cli@releases/v1
+
+      - name: Install dependencies
+        run: |
+          cd $GITHUB_WORKSPACE/infra
+          npm install
+      # - name: Deploy
+      #   run: |
+      #     cd $GITHUB_WORKSPACE/infra
+      #     pulumi stack select ${{ matrix.stack }}
+      #     pulumi up --yes
+      #   env:
+      #     DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      #     PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}

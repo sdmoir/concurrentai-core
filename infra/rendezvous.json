@@ -3,8 +3,6 @@
   "services": [
     {
       "id": "wine",
-      "businessTopic": "business-objective-1",
-      "collectionTopic": "business-objective-1",
       "models": [
         {
           "id": "latest",

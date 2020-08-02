@@ -1,0 +1,16 @@
+config:
+  rendezvous:rendezvous: |-
+    {
+      "organizationId": "concurrent",
+      "services": [
+        {
+          "id": "wine",
+          "models": [
+            {
+              "id": "latest",
+              "image": "registry.digitalocean.com/concurrent-ai/demo-models:sklearn_elasticnet_wine_latest"
+            }
+          ]
+        }
+      ]
+    }
