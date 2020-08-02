@@ -47,6 +47,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Install Pulumi CLI
         uses: pulumi/action-install-pulumi-cli@releases/v1
 
@@ -57,6 +60,7 @@ jobs:
       - id: list-stacks
         name: List stacks to deploy
         run: |
+          cd infra
           stacks=$(pulumi stack ls | grep -o "rendezvous\/[a-zA-Z0-9]\+\$" | sed "s/rendezvous\///g" | jq '. | split("\n") | map(select(length > 0)) | {stack: .}' -Rsc)
           echo "::set-output name=matrix::$stacks"
 
