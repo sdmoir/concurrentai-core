@@ -63,6 +63,8 @@ jobs:
           cd infra
           stacks=$(pulumi stack ls | grep -o "rendezvous\/[a-zA-Z0-9]\+\$" | sed "s/rendezvous\///g" | jq '. | split("\n") | map(select(length > 0)) | {stack: .}' -Rsc)
           echo "::set-output name=matrix::$stacks"
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
     outputs:
       matrix: ${{ steps.list-stacks.outputs.matrix }}
