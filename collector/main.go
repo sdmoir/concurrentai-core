@@ -2,9 +2,10 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/apache/pulsar-client-go/pulsar"
 	"io/ioutil"
 	"log"
 	"net"
@@ -13,7 +14,9 @@ import (
 	"time"
 )
 
-func handleNextMessage(consumer *kafka.Consumer) {
+var config = LoadConfig()
+
+func handleNextMessage(consumer pulsar.Consumer) {
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Printf("panic occurred: %s", err)
@@ -21,20 +24,20 @@ func handleNextMessage(consumer *kafka.Consumer) {
 		// fmt.Println("here")
 	}()
 
-	message, err := consumer.ReadMessage(100 * time.Millisecond)
+	message, err := consumer.Receive(context.Background())
+
 	if err == nil {
-		fmt.Printf("consumed from topic %s [%d] at offset %v: "+
-			string(message.Value), *message.TopicPartition.Topic,
-			message.TopicPartition.Partition, message.TopicPartition.Offset)
+		fmt.Printf("consumed from topic %s at offset %v: "+
+			string(message.Payload()), message.Topic())
 
 		response := getModelResponse(message)
 		writeRendezvousResponse(message, response)
 	}
 }
 
-func getModelResponse(message *kafka.Message) []byte {
+func getModelResponse(message pulsar.Message) []byte {
 	var messageValue map[string]interface{}
-	if err := json.Unmarshal(message.Value, &messageValue); err != nil {
+	if err := json.Unmarshal(message.Payload(), &messageValue); err != nil {
 		log.Fatal(err)
 	}
 
@@ -60,9 +63,9 @@ func getModelResponse(message *kafka.Message) []byte {
 	return body
 }
 
-func writeRendezvousResponse(message *kafka.Message, body []byte) {
+func writeRendezvousResponse(message pulsar.Message, body []byte) {
 	var messageValue map[string]interface{}
-	if err := json.Unmarshal(message.Value, &messageValue); err != nil {
+	if err := json.Unmarshal(message.Payload(), &messageValue); err != nil {
 		log.Fatal(err)
 	}
 	socketAddress := fmt.Sprintf("/sockets/%s.sock", messageValue["id"])
@@ -92,29 +95,25 @@ func writeRendezvousResponse(message *kafka.Message, body []byte) {
 }
 
 func main() {
-	brokers := os.Getenv("KAFKA_BROKERS")
-	apiKey := os.Getenv("KAFKA_API_KEY")
-	apiSecret := os.Getenv("KAFKA_API_SECRET")
-	topic := os.Getenv("KAFKA_TOPIC")
-
-	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers":  brokers,
-		"sasl.mechanisms":    "PLAIN",
-		"security.protocol":  "SASL_SSL",
-		"sasl.username":      apiKey,
-		"sasl.password":      apiSecret,
-		"session.timeout.ms": 6000,
-		"group.id":           "collector",
-		"auto.offset.reset":  "latest"})
+	client, err := pulsar.NewClient(pulsar.ClientOptions{
+		URL: config.pulsarURL,
+	})
 
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Failed to create consumer: %s", err))
+		log.Fatal("failed to create pulsar client", err)
 	}
 
-	fmt.Println("Created consumer")
+	defer client.Close()
 
-	topics := []string{topic}
-	if err := consumer.SubscribeTopics(topics, nil); err != nil {
+	topic := TopicName(config, "model-request")
+
+	consumer, err := client.Subscribe(pulsar.ConsumerOptions{
+		Topic:            topic,
+		SubscriptionName: fmt.Sprintf("%s-subscription", topic),
+		Type:             pulsar.Shared,
+	})
+
+	if err != nil {
 		log.Fatal("error subscribing to topic:", err)
 	}
 

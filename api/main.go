@@ -1,37 +1,35 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/google/uuid"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
-	"os"
 )
 
-func publishRequest(requestID uuid.UUID, request *http.Request) {
-	brokers := os.Getenv("KAFKA_BROKERS")
-	apiKey := os.Getenv("KAFKA_API_KEY")
-	apiSecret := os.Getenv("KAFKA_API_SECRET")
-	topic := os.Getenv("KAFKA_TOPIC")
+var config = LoadConfig()
 
-	fmt.Printf("%s", brokers)
-	fmt.Printf("%s", apiKey)
-	fmt.Printf("%s", apiSecret)
-
-	producer, err := kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers": brokers,
-		"sasl.mechanisms":   "PLAIN",
-		"security.protocol": "SASL_SSL",
-		"sasl.username":     apiKey,
-		"sasl.password":     apiSecret})
-
+func publishPulsarRequest(requestID uuid.UUID, request *http.Request) {
+	client, err := pulsar.NewClient(pulsar.ClientOptions{
+		URL: config.pulsarURL,
+	})
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Failed to create producer: %s", err))
+		log.Fatal("failed to create pulsar client", err)
 	}
+	defer client.Close()
+
+	producer, err := client.CreateProducer(pulsar.ProducerOptions{
+		Topic: TopicName(config, "model-request"),
+	})
+	if err != nil {
+		log.Fatal("failed to create pulsar producer", err)
+	}
+	defer producer.Close()
 
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
@@ -50,33 +48,13 @@ func publishRequest(requestID uuid.UUID, request *http.Request) {
 		log.Fatal("failed to marshal request body:", err)
 	}
 
-	producer.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &topic,
-			Partition: kafka.PartitionAny},
-		Value: payloadBytes}, nil)
+	_, err = producer.Send(context.Background(), &pulsar.ProducerMessage{
+		Payload: payloadBytes,
+	})
 
-	// Wait for delivery report
-	e := <-producer.Events()
-
-	switch e.(type) {
-	default:
-		fmt.Printf("produced message: %s", payload["id"])
-	case kafka.Error:
-		log.Fatal("kafka error:", e)
+	if err != nil {
+		log.Fatal("failed to publish message:", err)
 	}
-
-	message := e.(*kafka.Message)
-	if message.TopicPartition.Error != nil {
-		fmt.Printf("failed to deliver message: %v\n",
-			message.TopicPartition)
-	} else {
-		fmt.Printf("delivered to topic %s [%d] at offset %v\n",
-			*message.TopicPartition.Topic,
-			message.TopicPartition.Partition,
-			message.TopicPartition.Offset)
-	}
-
-	producer.Close()
 }
 
 func waitForRendezvousResponse(requestID uuid.UUID) []byte {
@@ -114,7 +92,7 @@ func writeResponseData(response http.ResponseWriter, data []byte) {
 
 func apiResponse(w http.ResponseWriter, r *http.Request) {
 	requestID := uuid.New()
-	publishRequest(requestID, r)
+	publishPulsarRequest(requestID, r)
 	data := waitForRendezvousResponse(requestID)
 	writeResponseData(w, data)
 	fmt.Println(data)
