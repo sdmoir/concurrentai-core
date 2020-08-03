@@ -1,15 +1,19 @@
 import * as k8s from "@pulumi/kubernetes";
 
-import { ModelConfig } from "../config";
+import { ModelConfig, ServiceConfig } from "../config";
 import { provider } from "../cluster/provider";
 import { secret as registrySecret } from "../cluster/registry";
 
-export function createModelService(modelConfig: ModelConfig) {
-  const metadata = { name: `rendezvous-model-${modelConfig.id}` };
-  const appLabels = { run: `rendezvous-model-${modelConfig.id}` };
+export function createModelService(
+  serviceConfig: ServiceConfig,
+  modelConfig: ModelConfig
+) {
+  const fullModelId = `${serviceConfig.id}-${modelConfig.id}`;
+  const metadata = { name: `rendezvous-model-${fullModelId}` };
+  const appLabels = { run: `rendezvous-model-${fullModelId}` };
 
   const deployment = new k8s.apps.v1.Deployment(
-    `rendezvous-model-${modelConfig.id}-deployment`,
+    `rendezvous-model-${fullModelId}-deployment`,
     {
       metadata: metadata,
       spec: {
@@ -41,7 +45,7 @@ export function createModelService(modelConfig: ModelConfig) {
   );
 
   const service = new k8s.core.v1.Service(
-    `rendezvous-model-${modelConfig.id}-service`,
+    `rendezvous-model-${fullModelId}-service`,
     {
       metadata: metadata,
       spec: {

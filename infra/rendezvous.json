@@ -1,5 +1,6 @@
 {
   "organizationId": "concurrent",
+  "region": "us-east",
   "services": [
     {
       "id": "wine",

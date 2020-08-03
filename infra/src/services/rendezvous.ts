@@ -22,24 +22,20 @@ export function createRendezvousService(serviceConfig: ServiceConfig) {
               {
                 name: "rendezvous-api",
                 ports: [{ containerPort: 9000 }],
-                image: `registry.digitalocean.com/concurrent-ai/rendezvous-service-poc-api:latest`,
+                image: `registry.digitalocean.com/concurrent-ai/rendezvous-api:latest`,
                 imagePullPolicy: "Always",
                 env: [
                   {
-                    name: "KAFKA_BROKERS",
-                    value: config.kafka.brokers,
+                    name: "ORGANIZATION_ID",
+                    value: config.rendezvous.organizationId,
                   },
                   {
-                    name: "KAFKA_API_KEY",
-                    value: config.kafka.apiKey,
+                    name: "SERVICE_ID",
+                    value: serviceConfig.id,
                   },
                   {
-                    name: "KAFKA_API_SECRET",
-                    value: config.kafka.apiSecret,
-                  },
-                  {
-                    name: "KAFKA_TOPIC",
-                    value: serviceConfig.businessTopic,
+                    name: "PULSAR_URL",
+                    value: config.pulsar.url,
                   },
                 ],
                 volumeMounts: [
@@ -51,28 +47,24 @@ export function createRendezvousService(serviceConfig: ServiceConfig) {
               },
               {
                 name: "rendezvous-collector",
-                image: `registry.digitalocean.com/concurrent-ai/rendezvous-service-poc-collector:latest`,
+                image: `registry.digitalocean.com/concurrent-ai/rendezvous-collector:latest`,
                 imagePullPolicy: "Always",
                 env: [
                   {
-                    name: "KAFKA_BROKERS",
-                    value: config.kafka.brokers,
+                    name: "ORGANIZATION_ID",
+                    value: config.rendezvous.organizationId,
                   },
                   {
-                    name: "KAFKA_API_KEY",
-                    value: config.kafka.apiKey,
+                    name: "SERVICE_ID",
+                    value: serviceConfig.id,
                   },
                   {
-                    name: "KAFKA_API_SECRET",
-                    value: config.kafka.apiSecret,
-                  },
-                  {
-                    name: "KAFKA_TOPIC",
-                    value: serviceConfig.collectionTopic,
+                    name: "PULSAR_URL",
+                    value: config.pulsar.url,
                   },
                   {
                     name: "MODEL_ENDPOINT",
-                    value: `http://rendezvous-model-${
+                    value: `http://rendezvous-model-${serviceConfig.id}-${
                       serviceConfig.models[0]?.id || "active"
                     }/invocations`,
                   },

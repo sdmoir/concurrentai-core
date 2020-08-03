@@ -9,7 +9,9 @@ export const certificate = new digitalocean.Certificate(
   `certificate-${config.rendezvous.organizationId}`,
   {
     type: "lets_encrypt",
-    domains: [`${config.rendezvous.organizationId}.concurrent.ai`],
+    domains: [
+      `${config.rendezvous.organizationId}.${config.rendezvous.region}.concurrent.ai`,
+    ],
   }
 );
 
@@ -44,7 +46,7 @@ export const dns = new digitalocean.DnsRecord(
   {
     domain: "concurrent.ai",
     type: "A",
-    name: config.rendezvous.organizationId,
+    name: `${config.rendezvous.organizationId}.${config.rendezvous.region}`,
     value: service.status.loadBalancer.apply(
       (lb) => lb.ingress[0].ip || lb.ingress[0].hostname
     ),

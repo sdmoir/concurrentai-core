@@ -1,7 +1,13 @@
 config:
+  rendezvous:digitalocean:
+    registryToken:
+      secure: AAABAAjHHWHJ0e+mL/OeJXK0U5ZEikc8k74lPiGNj7+oCXuHcREOPx8cHpNiM6LBiARc5hR77q4itQl2FdHVuwuEE89rpVs3TV8ZS6sPt7sdgd1CHhSQWec41NlViDYE/qsXqfyngrUQsBOZjQfNRS49Y9l7iYLU6E4iEGva1dVvQciEd4ZQ+dXDedMa5wWQMFnm1l/O3rz+pWsHAmadH7/1YmJX0hvfmqTx0FKoNEsJGp5yqcQcNlabBfuCYQuqoG/3h5JrIaxAccO/
+  rendezvous:pulsar:
+    url: pulsar://sn-platform-pulsar-proxy.pulsar.svc.cluster.local:6650
   rendezvous:rendezvous: |-
     {
       "organizationId": "concurrent",
+      "region": "us-east",
       "services": [
         {
           "id": "wine",

@@ -4,10 +4,8 @@ interface DigitalOceanConfig {
   registryToken: string;
 }
 
-interface KafkaConfig {
-  brokers: string;
-  apiKey: string;
-  apiSecret: string;
+interface PulsarConfig {
+  url: string;
 }
 
 export interface ModelConfig {
@@ -17,19 +15,18 @@ export interface ModelConfig {
 
 export interface ServiceConfig {
   id: string;
-  businessTopic: string;
-  collectionTopic: string;
   models: [ModelConfig];
 }
 
 export interface RendezvousConfig {
   organizationId: string;
+  region: string;
   services: [ServiceConfig];
 }
 
 export interface InfraConfig {
   digitalocean: DigitalOceanConfig;
-  kafka: KafkaConfig;
+  pulsar: PulsarConfig;
   rendezvous: RendezvousConfig;
 }
 
@@ -37,7 +34,7 @@ const config = new pulumi.Config();
 
 const infraConfig: InfraConfig = {
   digitalocean: config.requireObject<DigitalOceanConfig>("digitalocean"),
-  kafka: config.requireObject<KafkaConfig>("kafka"),
+  pulsar: config.requireObject<PulsarConfig>("pulsar"),
   rendezvous: config.requireObject<RendezvousConfig>("rendezvous"),
 };
 
