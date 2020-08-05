@@ -58,7 +58,7 @@ func publishPulsarRequest(requestID uuid.UUID, request *http.Request) {
 }
 
 func waitForRendezvousResponse(requestID uuid.UUID) []byte {
-	socketAddress := log.Sprintf("/sockets/%s.sock", requestID)
+	socketAddress := fmt.Sprintf("/sockets/%s.sock", requestID)
 	data := waitForSocketData(socketAddress)
 	return data
 }
