@@ -1,4 +1,4 @@
-module github.com/concurrent-ai/rendezvous-service-poc/collector
+module github.com/concurrent-ai/rendezvous/collector
 
 go 1.14
 

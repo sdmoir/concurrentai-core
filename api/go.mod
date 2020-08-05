@@ -1,4 +1,4 @@
-module github.com/concurrent-ai/rendezvous-service-poc/api
+module github.com/concurrent-ai/rendezvous/api
 
 go 1.14
 

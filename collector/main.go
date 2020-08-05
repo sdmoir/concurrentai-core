@@ -105,7 +105,7 @@ func main() {
 
 	defer client.Close()
 
-	topic := TopicName(config, "model-request")
+	topic := config.TopicName("model-input")
 
 	consumer, err := client.Subscribe(pulsar.ConsumerOptions{
 		Topic:            topic,

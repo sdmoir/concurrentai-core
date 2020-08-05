@@ -5,11 +5,11 @@ import { provider } from "../cluster/provider";
 import { secret as registrySecret } from "../cluster/registry";
 
 export function createRendezvousService(serviceConfig: ServiceConfig) {
-  const metadata = { name: `rendezvous-service-${serviceConfig.id}` };
-  const appLabels = { run: `rendezvous-service-${serviceConfig.id}` };
+  const metadata = { name: `rendezvous-${serviceConfig.id}-service` };
+  const appLabels = { run: `rendezvous-${serviceConfig.id}-service` };
 
   const deployment = new k8s.apps.v1.Deployment(
-    `rendezvous-deployment-${serviceConfig.id}`,
+    `rendezvous-${serviceConfig.id}-service-deployment`,
     {
       metadata: metadata,
       spec: {
@@ -98,7 +98,7 @@ export function createRendezvousService(serviceConfig: ServiceConfig) {
   );
 
   const service = new k8s.core.v1.Service(
-    `rendezvous-service-${serviceConfig.id}`,
+    `rendezvous-${serviceConfig.id}-service`,
     {
       metadata: metadata,
       spec: {
