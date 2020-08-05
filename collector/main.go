@@ -16,7 +16,7 @@ var config = LoadConfig()
 func handleNextMessage(consumer pulsar.Consumer) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Printf("panic occurred: %s", err)
+			log.Printf("panic occurred: %s", err)
 		}
 		// fmt.Println("here")
 	}()
@@ -24,7 +24,7 @@ func handleNextMessage(consumer pulsar.Consumer) {
 	message, err := consumer.Receive(context.Background())
 
 	if err == nil {
-		fmt.Printf("consumed from topic %s at offset %v: "+
+		log.Printf("consumed from topic %s at offset %v: "+
 			string(message.Payload()), message.Topic())
 
 		writeRendezvousResponse(message)
