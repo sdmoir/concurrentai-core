@@ -62,12 +62,6 @@ export function createRendezvousService(serviceConfig: ServiceConfig) {
                     name: "PULSAR_URL",
                     value: config.pulsar.url,
                   },
-                  {
-                    name: "MODEL_ENDPOINT",
-                    value: `http://rendezvous-${serviceConfig.id}-model-${
-                      serviceConfig.models[0]?.id || "active"
-                    }/invocations`,
-                  },
                 ],
                 volumeMounts: [
                   {

@@ -1,15 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/apache/pulsar-client-go/pulsar"
-	"io/ioutil"
 	"log"
 	"net"
-	"net/http"
 	"os"
 	"time"
 )
@@ -30,40 +27,11 @@ func handleNextMessage(consumer pulsar.Consumer) {
 		fmt.Printf("consumed from topic %s at offset %v: "+
 			string(message.Payload()), message.Topic())
 
-		response := getModelResponse(message)
-		writeRendezvousResponse(message, response)
+		writeRendezvousResponse(message)
 	}
 }
 
-func getModelResponse(message pulsar.Message) []byte {
-	var messageValue map[string]interface{}
-	if err := json.Unmarshal(message.Payload(), &messageValue); err != nil {
-		log.Fatal(err)
-	}
-
-	delete(messageValue, "id")
-
-	requestBody, _ := json.Marshal(messageValue)
-
-	modelEndpoint := os.Getenv("MODEL_ENDPOINT")
-
-	response, err := http.Post(modelEndpoint, "application/json", bytes.NewBuffer(requestBody))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer response.Body.Close()
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(string(body))
-	return body
-}
-
-func writeRendezvousResponse(message pulsar.Message, body []byte) {
+func writeRendezvousResponse(message pulsar.Message) {
 	var messageValue map[string]interface{}
 	if err := json.Unmarshal(message.Payload(), &messageValue); err != nil {
 		log.Fatal(err)
@@ -86,7 +54,7 @@ func writeRendezvousResponse(message pulsar.Message, body []byte) {
 	}
 	defer connection.Close()
 
-	response := fmt.Sprintf("{ \"results\": %s }", string(body))
+	response := fmt.Sprintf("{ \"results\": %s }", messageValue["response"])
 
 	_, error = connection.Write([]byte(response))
 	if error != nil {
@@ -105,7 +73,7 @@ func main() {
 
 	defer client.Close()
 
-	topic := config.TopicName("model-input")
+	topic := config.TopicName("model-response")
 
 	consumer, err := client.Subscribe(pulsar.ConsumerOptions{
 		Topic:            topic,
