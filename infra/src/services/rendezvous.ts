@@ -64,7 +64,7 @@ export function createRendezvousService(serviceConfig: ServiceConfig) {
                   },
                   {
                     name: "MODEL_ENDPOINT",
-                    value: `http://rendezvous-model-${serviceConfig.id}-${
+                    value: `http://rendezvous-${serviceConfig.id}-model-${
                       serviceConfig.models[0]?.id || "active"
                     }/invocations`,
                   },

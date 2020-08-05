@@ -8,12 +8,12 @@ export function createModelService(
   serviceConfig: ServiceConfig,
   modelConfig: ModelConfig
 ) {
-  const fullModelId = `${serviceConfig.id}-${modelConfig.id}`;
-  const metadata = { name: `rendezvous-model-${fullModelId}` };
-  const appLabels = { run: `rendezvous-model-${fullModelId}` };
+  const fullModelId = `${serviceConfig.id}-model-${modelConfig.id}`;
+  const metadata = { name: `rendezvous-${fullModelId}` };
+  const appLabels = { run: `rendezvous-${fullModelId}` };
 
   const deployment = new k8s.apps.v1.Deployment(
-    `rendezvous-model-${fullModelId}-deployment`,
+    `rendezvous-${fullModelId}-deployment`,
     {
       metadata: metadata,
       spec: {
@@ -45,7 +45,7 @@ export function createModelService(
   );
 
   const service = new k8s.core.v1.Service(
-    `rendezvous-model-${fullModelId}-service`,
+    `rendezvous-${fullModelId}`,
     {
       metadata: metadata,
       spec: {
