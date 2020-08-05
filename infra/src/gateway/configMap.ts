@@ -32,7 +32,7 @@ const krakendConfig = {
     concurrent_calls: 1,
     backend: [
       {
-        host: `http://rendezvous-service-${service.id}/`,
+        host: `http://rendezvous-${service.id}-service/`,
       },
     ],
   })),
