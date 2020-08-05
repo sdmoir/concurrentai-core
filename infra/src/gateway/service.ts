@@ -16,7 +16,7 @@ export const certificate = new digitalocean.Certificate(
 );
 
 export const service = new k8s.core.v1.Service(
-  "rendezvous-gateway",
+  "rendezvous-gateway-service",
   {
     metadata: {
       ...metadata,

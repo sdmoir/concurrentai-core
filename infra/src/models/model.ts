@@ -45,7 +45,7 @@ export function createModelService(
   );
 
   const service = new k8s.core.v1.Service(
-    `rendezvous-${fullModelId}`,
+    `rendezvous-${fullModelId}-service`,
     {
       metadata: metadata,
       spec: {
