@@ -103,7 +103,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/infra
           pulumi stack select ${{ matrix.stack }}
-          pulumi up --yes
+          pulumi up --yes --suppress-outputs
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
