@@ -1,4 +1,4 @@
-module github.com/concurrent-ai/rendezvous/enricher
+module github.com/concurrent-ai/rendezvous/model-enricher
 
 go 1.14
 

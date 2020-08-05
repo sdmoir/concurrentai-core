@@ -15,7 +15,7 @@ jobs:
       matrix:
         service:
           - api
-          - enricher
+          - model-enricher
           - collector
 
     steps:
