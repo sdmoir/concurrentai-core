@@ -26,7 +26,7 @@ export function createModelService(
               {
                 name: "model",
                 ports: [{ containerPort: 8080 }],
-                image: modelConfig.image,
+                image: modelConfig.config.image,
                 imagePullPolicy: "Always",
               },
             ],

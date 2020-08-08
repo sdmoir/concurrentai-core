@@ -7,7 +7,18 @@
       "models": [
         {
           "id": "latest",
-          "image": "registry.digitalocean.com/concurrent-ai/demo-models:sklearn_elasticnet_wine_latest"
+          "live": true,
+          "type": "mlflow-docker",
+          "config": {
+            "image": "registry.digitalocean.com/concurrent-ai/demo-models:sklearn_elasticnet_wine_latest"
+          }
+        },
+        {
+          "id": "model-2",
+          "type": "mlflow-docker",
+          "config": {
+            "image": "registry.digitalocean.com/concurrent-ai/demo-models:sklearn_elasticnet_wine_160ef3f622224055b4312ad92b3548ca"
+          }
         }
       ]
     }
