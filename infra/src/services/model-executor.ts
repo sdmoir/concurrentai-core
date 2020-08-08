@@ -8,11 +8,12 @@ export function createModelExecutor(
   serviceConfig: ServiceConfig,
   modelConfig: ModelConfig
 ) {
-  const metadata = { name: `rendezvous-${serviceConfig.id}-model-executor` };
-  const appLabels = { run: `rendezvous-${serviceConfig.id}-model-executor` };
+  const fullModelExecutorId = `rendezvous-${serviceConfig.id}-model-${modelConfig.id}-executor`;
+  const metadata = { name: fullModelExecutorId };
+  const appLabels = { run: fullModelExecutorId };
 
   const deployment = new k8s.apps.v1.Deployment(
-    `rendezvous-${serviceConfig.id}-model-executor-deployment`,
+    `${fullModelExecutorId}-deployment`,
     {
       metadata: metadata,
       spec: {
