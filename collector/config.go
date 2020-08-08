@@ -9,6 +9,7 @@ import (
 type Config struct {
 	organizationID string
 	serviceID      string
+	activeModelID  string
 	pulsarURL      string
 }
 
@@ -17,6 +18,7 @@ func LoadConfig() Config {
 	return Config{
 		organizationID: os.Getenv("ORGANIZATION_ID"),
 		serviceID:      os.Getenv("SERVICE_ID"),
+		activeModelID:  os.Getenv("ACTIVE_MODEL_ID"),
 		pulsarURL:      os.Getenv("PULSAR_URL"),
 	}
 }

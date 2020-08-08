@@ -1,10 +1,13 @@
 import * as k8s from "@pulumi/kubernetes";
 
-import config, { ServiceConfig } from "../config";
+import config, { ServiceConfig, ModelConfig } from "../config";
 import { provider } from "../cluster/provider";
 import { secret as registrySecret } from "../cluster/registry";
 
-export function createModelExecutor(serviceConfig: ServiceConfig) {
+export function createModelExecutor(
+  serviceConfig: ServiceConfig,
+  modelConfig: ModelConfig
+) {
   const metadata = { name: `rendezvous-${serviceConfig.id}-model-executor` };
   const appLabels = { run: `rendezvous-${serviceConfig.id}-model-executor` };
 
@@ -33,14 +36,16 @@ export function createModelExecutor(serviceConfig: ServiceConfig) {
                     value: serviceConfig.id,
                   },
                   {
-                    name: "PULSAR_URL",
-                    value: config.pulsar.url,
+                    name: "MODEL_ID",
+                    value: modelConfig.id,
                   },
                   {
                     name: "MODEL_ENDPOINT",
-                    value: `http://rendezvous-${serviceConfig.id}-model-${
-                      serviceConfig.models[0]?.id || "active"
-                    }/invocations`,
+                    value: `http://rendezvous-${serviceConfig.id}-model-${modelConfig.id}/invocations`,
+                  },
+                  {
+                    name: "PULSAR_URL",
+                    value: config.pulsar.url,
                   },
                 ],
               },

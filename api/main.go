@@ -4,48 +4,64 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/apache/pulsar-client-go/pulsar"
-	"github.com/google/uuid"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
+	"time"
+
+	"github.com/apache/pulsar-client-go/pulsar"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 var config = LoadConfig()
 
-func publishPulsarRequest(requestID uuid.UUID, request *http.Request) {
-	client, err := pulsar.NewClient(pulsar.ClientOptions{
-		URL: config.pulsarURL,
-	})
+type rendezvousRequest struct {
+	id     string
+	events map[string]time.Time
+	data   map[string]interface{}
+}
+
+func readRequestBody(request *http.Request) (map[string]interface{}, error) {
+	bytes, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		log.Fatal("failed to create pulsar client", err)
+		return nil, errors.Wrap(err, "failed to read request body")
 	}
+
+	var body map[string]interface{}
+	if err := json.Unmarshal(bytes, &body); err != nil {
+		return nil, errors.Wrap(err, "failed to parse request body")
+	}
+
+	return body, nil
+}
+
+func publishPulsarRequest(requestID uuid.UUID, request *http.Request) {
+	client := CreatePulsarClient(config)
 	defer client.Close()
 
-	producer, err := client.CreateProducer(pulsar.ProducerOptions{
-		Topic: TopicName(config, "model-request"),
-	})
-	if err != nil {
-		log.Fatal("failed to create pulsar producer", err)
-	}
+	fmt.Println("Topic: " + config.TopicName("model-request"))
+
+	producer := CreatePulsarProducer(client, config.TopicName("model-request"))
 	defer producer.Close()
 
-	body, err := ioutil.ReadAll(request.Body)
+	body, err := readRequestBody(request)
 	if err != nil {
-		log.Fatal("failed to read request body:", err)
+		log.Fatal(err)
 	}
 
-	var payload map[string]interface{}
-	if err := json.Unmarshal(body, &payload); err != nil {
-		log.Fatal("failed to parse request body:", err)
+	rendezvousRequest := &rendezvousRequest{
+		id: requestID.String(),
+		events: map[string]time.Time{
+			"requestReceived": time.Now(),
+		},
+		data: body,
 	}
 
-	payload["id"] = requestID.String()
-
-	payloadBytes, err := json.Marshal(payload)
+	payloadBytes, err := json.Marshal(rendezvousRequest)
 	if err != nil {
-		log.Fatal("failed to marshal request body:", err)
+		log.Fatal("failed to marshal rendezvous request:", err)
 	}
 
 	_, err = producer.Send(context.Background(), &pulsar.ProducerMessage{

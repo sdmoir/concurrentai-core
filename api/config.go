@@ -22,6 +22,6 @@ func LoadConfig() Config {
 }
 
 // TopicName : Construct a topic name with the specified suffix
-func TopicName(config Config, suffix string) string {
+func (config Config) TopicName(suffix string) string {
 	return fmt.Sprintf("%s/%s/%s", config.organizationID, config.serviceID, suffix)
 }

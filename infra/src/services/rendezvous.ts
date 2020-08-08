@@ -59,6 +59,10 @@ export function createRendezvousService(serviceConfig: ServiceConfig) {
                     value: serviceConfig.id,
                   },
                   {
+                    name: "ACTIVE_MODEL_ID",
+                    value: serviceConfig.models.find((model) => model.live)?.id,
+                  },
+                  {
                     name: "PULSAR_URL",
                     value: config.pulsar.url,
                   },

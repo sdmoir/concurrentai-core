@@ -31,12 +31,28 @@ func handleNextMessage(consumer pulsar.Consumer) {
 	}
 }
 
+type rendezvousModelResponse struct {
+	id            string
+	events        map[string]interface{}
+	body          map[string]interface{}
+	modelID       string
+	modelResponse string
+}
+
 func writeRendezvousResponse(message pulsar.Message) {
-	var messageValue map[string]interface{}
-	if err := json.Unmarshal(message.Payload(), &messageValue); err != nil {
+	var modelResponse *rendezvousModelResponse
+	if err := json.Unmarshal(message.Payload(), &modelResponse); err != nil {
 		log.Fatal(err)
 	}
-	socketAddress := fmt.Sprintf("/sockets/%s.sock", messageValue["id"])
+
+	if modelResponse.modelID != config.activeModelID {
+		log.Println("Received shadow model response" + modelResponse.modelResponse)
+		return
+	}
+
+	log.Println("Received active model response" + modelResponse.modelResponse)
+
+	socketAddress := fmt.Sprintf("/sockets/%s.sock", modelResponse.id)
 
 	for i := 0; i <= 300; i++ {
 		if _, err := os.Stat(socketAddress); os.IsNotExist(err) {
@@ -54,7 +70,7 @@ func writeRendezvousResponse(message pulsar.Message) {
 	}
 	defer connection.Close()
 
-	response := fmt.Sprintf("{ \"results\": %s }", messageValue["response"])
+	response := fmt.Sprintf("{ \"results\": %s }", modelResponse.modelResponse)
 
 	_, error = connection.Write([]byte(response))
 	if error != nil {

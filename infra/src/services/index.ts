@@ -4,11 +4,18 @@ import { createModelEnricher } from "./enricher";
 import { createModelExecutor } from "./model-executor";
 
 const services = (config.rendezvous.services || []).map((service) => {
-  return [
+  let services = [
     createRendezvousService(service),
     createModelEnricher(service),
-    createModelExecutor(service),
   ];
+
+  services.concat(
+    service.models.map((model) => {
+      return createModelExecutor(service, model);
+    })
+  );
+
+  return services;
 });
 
 export { services };

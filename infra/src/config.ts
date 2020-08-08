@@ -10,7 +10,11 @@ interface PulsarConfig {
 
 export interface ModelConfig {
   id: string;
-  image: string;
+  live: boolean;
+  type: string;
+  config: {
+    image: string;
+  };
 }
 
 export interface ServiceConfig {
