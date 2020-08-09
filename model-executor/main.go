@@ -83,7 +83,7 @@ func handleNextMessage(consumer pulsar.Consumer, producer pulsar.Producer, confi
 			return
 		}
 
-		log.Print("published to topic " + producer.Topic())
+		log.Println("published to topic " + producer.Topic() + ": " + string(payload))
 	}
 }
 
