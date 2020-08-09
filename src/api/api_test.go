@@ -14,9 +14,9 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	. "github.com/concurrent-ai/rendezvous/src/api"
-	"github.com/concurrent-ai/rendezvous/src/api/internal/domain"
-	messagingMocks "github.com/concurrent-ai/rendezvous/src/api/internal/messaging/mocks"
-	socketMocks "github.com/concurrent-ai/rendezvous/src/api/internal/sockets/mocks"
+	"github.com/concurrent-ai/rendezvous/src/shared/domain"
+	messagingMocks "github.com/concurrent-ai/rendezvous/src/shared/messaging/mocks"
+	socketMocks "github.com/concurrent-ai/rendezvous/src/shared/sockets/mocks"
 )
 
 type badReader int

@@ -11,9 +11,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
-	"github.com/concurrent-ai/rendezvous/src/api/internal/domain"
-	"github.com/concurrent-ai/rendezvous/src/api/internal/messaging"
-	"github.com/concurrent-ai/rendezvous/src/api/internal/sockets"
+	"github.com/concurrent-ai/rendezvous/src/shared/domain"
+	"github.com/concurrent-ai/rendezvous/src/shared/messaging"
+	"github.com/concurrent-ai/rendezvous/src/shared/sockets"
 )
 
 // APIController : Controller for handling rendezvous API requests
@@ -68,7 +68,7 @@ func (controller *APIController) HandleRequest(w http.ResponseWriter, r *http.Re
 func main() {
 	log.Println("Starting server")
 
-	config := domain.LoadConfig()
+	config := LoadConfig()
 
 	pulsarProducer, err := messaging.NewPulsarProducer(config.PulsarURL, config.TopicName("model-request"))
 	if err != nil {
