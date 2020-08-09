@@ -6,14 +6,34 @@ on:
       - master
 
 jobs:
-  build-and-push:
-    name: Build and push
+  test:
+    name: test
 
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        service:
+        module:
+          - api
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run tests
+        run: |
+          cd src/${{ matrix.module }}
+          go test ./...
+
+  build-and-push:
+    name: Build and push
+    needs: test
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        module:
           - api
           - model-enricher
           - model-executor
@@ -35,12 +55,12 @@ jobs:
 
       - name: Build and tag
         run: |
-          docker build src/${{ matrix.service }} \
-              -t registry.digitalocean.com/concurrent-ai/rendezvous-${{ matrix.service }}:latest
+          docker build src/${{ matrix.module }} \
+              -t registry.digitalocean.com/concurrent-ai/rendezvous-${{ matrix.module }}:latest
 
       - name: Push
         run: |
-          docker push registry.digitalocean.com/concurrent-ai/rendezvous-${{ matrix.service }}:latest
+          docker push registry.digitalocean.com/concurrent-ai/rendezvous-${{ matrix.module }}:latest
 
   get-stacks:
     name: Get rendezvous stacks
