@@ -71,6 +71,8 @@ func publishPulsarRequest(requestID uuid.UUID, request *http.Request) {
 	if err != nil {
 		log.Fatal("failed to publish message:", err)
 	}
+
+	log.Println("published rendezvous request: " + string(payloadBytes))
 }
 
 func waitForRendezvousResponse(requestID uuid.UUID) []byte {

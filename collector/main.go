@@ -24,8 +24,7 @@ func handleNextMessage(consumer pulsar.Consumer) {
 	message, err := consumer.Receive(context.Background())
 
 	if err == nil {
-		log.Printf("consumed from topic %s at offset %v: "+
-			string(message.Payload()), message.Topic())
+		log.Println("consumed from topic " + message.Topic() + ": " + string(message.Payload()))
 
 		writeRendezvousResponse(message)
 	}
