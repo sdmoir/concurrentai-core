@@ -1,4 +1,4 @@
-package main
+package domain
 
 import (
 	"fmt"
@@ -7,21 +7,21 @@ import (
 
 // Config : All configuration values needed for the rendezvous api service
 type Config struct {
-	organizationID string
-	serviceID      string
-	pulsarURL      string
+	OrganizationID string
+	ServiceID      string
+	PulsarURL      string
 }
 
 // LoadConfig : Load configuration from environment variables
 func LoadConfig() Config {
 	return Config{
-		organizationID: os.Getenv("ORGANIZATION_ID"),
-		serviceID:      os.Getenv("SERVICE_ID"),
-		pulsarURL:      os.Getenv("PULSAR_URL"),
+		OrganizationID: os.Getenv("ORGANIZATION_ID"),
+		ServiceID:      os.Getenv("SERVICE_ID"),
+		PulsarURL:      os.Getenv("PULSAR_URL"),
 	}
 }
 
 // TopicName : Construct a topic name with the specified suffix
 func (config Config) TopicName(suffix string) string {
-	return fmt.Sprintf("%s/%s/%s", config.organizationID, config.serviceID, suffix)
+	return fmt.Sprintf("%s/%s/%s", config.OrganizationID, config.ServiceID, suffix)
 }

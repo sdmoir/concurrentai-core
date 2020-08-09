@@ -1,123 +1,86 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
 	"time"
 
-	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+
+	"github.com/concurrent-ai/rendezvous/src/api/internal/domain"
+	"github.com/concurrent-ai/rendezvous/src/api/internal/messaging"
+	"github.com/concurrent-ai/rendezvous/src/api/internal/sockets"
 )
 
-var config = LoadConfig()
-
-type rendezvousRequest struct {
-	id     string
-	events map[string]time.Time
-	data   map[string]interface{}
+// APIController : Controller for handling rendezvous API requests
+type APIController struct {
+	Producer messaging.Producer
+	Listener sockets.Listener
 }
 
-func readRequestBody(request *http.Request) (map[string]interface{}, error) {
-	bytes, err := ioutil.ReadAll(request.Body)
+// HandleRequest : Handle a rendezvous API request
+func (controller *APIController) HandleRequest(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read request body")
+		log.Println(errors.Wrap(err, "error reading request body"))
+		http.Error(w, "can't ready body", http.StatusBadRequest)
+		return
 	}
 
-	var body map[string]interface{}
-	if err := json.Unmarshal(bytes, &body); err != nil {
-		return nil, errors.Wrap(err, "failed to parse request body")
-	}
-
-	return body, nil
-}
-
-func publishPulsarRequest(requestID uuid.UUID, request *http.Request) {
-	client := CreatePulsarClient(config)
-	defer client.Close()
-
-	fmt.Println("Topic: " + config.TopicName("model-request"))
-
-	producer := CreatePulsarProducer(client, config.TopicName("model-request"))
-	defer producer.Close()
-
-	body, err := readRequestBody(request)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	rendezvousRequest := &rendezvousRequest{
-		id: requestID.String(),
-		events: map[string]time.Time{
-			"requestReceived": time.Now(),
+	rendezvousRequest := &domain.RendezvousRequest{
+		ID: uuid.New().String(),
+		Events: map[string]interface{}{
+			"requestTimestamp": time.Now(),
 		},
-		data: body,
+		Data: string(body),
 	}
 
-	payloadBytes, err := json.Marshal(rendezvousRequest)
+	producerPayload, err := json.Marshal(rendezvousRequest)
 	if err != nil {
-		log.Fatal("failed to marshal rendezvous request:", err)
+		log.Println(errors.Wrap(err, "error encoding rendezvous reqeuest payload"))
+		http.Error(w, "error processing request", http.StatusInternalServerError)
+		return
 	}
 
-	_, err = producer.Send(context.Background(), &pulsar.ProducerMessage{
-		Payload: payloadBytes,
-	})
-
+	err = controller.Producer.Send(producerPayload)
 	if err != nil {
-		log.Fatal("failed to publish message:", err)
+		log.Println(errors.Wrap(err, "error sending rendezvous request payload"))
+		http.Error(w, "error processing request", http.StatusInternalServerError)
+		return
 	}
 
-	log.Println("published rendezvous request: " + string(payloadBytes))
-}
-
-func waitForRendezvousResponse(requestID uuid.UUID) []byte {
-	socketAddress := fmt.Sprintf("/sockets/%s.sock", requestID)
-	data := waitForSocketData(socketAddress)
-	return data
-}
-
-func waitForSocketData(socketAddress string) []byte {
-	listener, err := net.Listen("unix", socketAddress)
+	socketAddress := fmt.Sprintf("/sockets/%s.sock", rendezvousRequest.ID)
+	rendezvousResponse, err := controller.Listener.Read(socketAddress)
 	if err != nil {
-		log.Fatal("listen error:", err)
-	}
-	defer listener.Close()
-
-	conn, err := listener.Accept()
-	if err != nil {
-		log.Fatal("accept error:", err)
-	}
-	defer conn.Close()
-
-	data, error := ioutil.ReadAll(conn)
-	if error != nil {
-		log.Fatal("read error:", error)
+		log.Println(errors.Wrap(err, "error reading rendezvous response from socket"))
+		http.Error(w, "error processing request", http.StatusInternalServerError)
+		return
 	}
 
-	return data
-}
-
-func writeResponseData(response http.ResponseWriter, data []byte) {
-	response.WriteHeader(http.StatusOK)
-	response.Header().Set("Content-Type", "application/json")
-	response.Write([]byte(data))
-}
-
-func apiResponse(w http.ResponseWriter, r *http.Request) {
-	requestID := uuid.New()
-	publishPulsarRequest(requestID, r)
-	data := waitForRendezvousResponse(requestID)
-	writeResponseData(w, data)
-	log.Println(data)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(rendezvousResponse)
 }
 
 func main() {
 	log.Println("Starting server")
-	http.HandleFunc("/", apiResponse)
+
+	config := domain.LoadConfig()
+
+	pulsarProducer, err := messaging.NewPulsarProducer(config.PulsarURL, config.TopicName("model-request"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer pulsarProducer.Close()
+
+	controller := &APIController{
+		Producer: pulsarProducer,
+		Listener: sockets.NewUnixListener(),
+	}
+
+	http.HandleFunc("/", controller.HandleRequest)
 	log.Fatal(http.ListenAndServe(":9000", nil))
 }
