@@ -1,11 +1,12 @@
 FROM golang:latest
 
-RUN mkdir /app
+RUN mkdir -p /app/shared
+ADD ./shared /app/shared
 
-ADD . /app
+RUN mkdir /app/model-enricher
+ADD ./model-enricher /app/model-enricher
 
-WORKDIR /app
-
+WORKDIR /app/model-enricher
 RUN go build -o main .
 
-CMD ["/app/main"]
+CMD ["/app/model-enricher/main"]

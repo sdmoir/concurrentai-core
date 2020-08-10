@@ -70,7 +70,13 @@ func main() {
 
 	config := LoadConfig()
 
-	pulsarProducer, err := messaging.NewPulsarProducer(config.PulsarURL, config.TopicName("model-request"))
+	pulsarClient, err := messaging.NewPulsarClient(config.PulsarURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer pulsarClient.Close()
+
+	pulsarProducer, err := pulsarClient.CreateProducer(config.TopicName("model-request"))
 	if err != nil {
 		log.Fatal(err)
 	}
