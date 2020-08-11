@@ -25,10 +25,10 @@ func (br badReader) Read(payload []byte) (int, error) {
 	return 0, errors.New("some error while reading body")
 }
 
-func getSentRendezvousRequest(mockProducer *messagingMocks.Producer) *domain.RendezvousRequest {
-	var rendezvousRequest *domain.RendezvousRequest
-	_ = json.Unmarshal(mockProducer.Calls[0].Arguments[0].([]byte), &rendezvousRequest)
-	return rendezvousRequest
+func getSentRendezvousMessage(mockProducer *messagingMocks.Producer) *domain.RendezvousMessage {
+	var rendezvousMessage *domain.RendezvousMessage
+	_ = json.Unmarshal(mockProducer.Calls[0].Arguments[0].([]byte), &rendezvousMessage)
+	return rendezvousMessage
 }
 
 var _ = Describe("APIController", func() {
@@ -75,7 +75,7 @@ var _ = Describe("APIController", func() {
 			Expect(response.StatusCode).To(Equal(http.StatusBadRequest))
 		})
 
-		It("should publish a rendezvous request with id to pulsar", func() {
+		It("should publish a rendezvous message with id to pulsar", func() {
 			// arrange
 			mockProducer.On("Send", mock.Anything).Return(nil).Once()
 			mockListener.On("Read", mock.Anything).Return([]byte(`{ "data": "test" }`), nil)
@@ -84,12 +84,11 @@ var _ = Describe("APIController", func() {
 			controller.HandleRequest(w, req)
 
 			// assert
-			rendezvousRequest := getSentRendezvousRequest(mockProducer)
-			Expect(rendezvousRequest.ID).To(Not(BeEmpty()))
-			Expect(rendezvousRequest.Data).To(Equal(body))
+			rendezvousMessage := getSentRendezvousMessage(mockProducer)
+			Expect(rendezvousMessage.ID).To(Not(BeEmpty()))
 		})
 
-		It("should publish a rendezvous request with data to pulsar", func() {
+		It("should publish a rendezvous message with request data to pulsar", func() {
 			// arrange
 			mockProducer.On("Send", mock.Anything).Return(nil).Once()
 			mockListener.On("Read", mock.Anything).Return([]byte(`{ "data": "test" }`), nil)
@@ -98,11 +97,11 @@ var _ = Describe("APIController", func() {
 			controller.HandleRequest(w, req)
 
 			// assert
-			rendezvousRequest := getSentRendezvousRequest(mockProducer)
-			Expect(rendezvousRequest.Data).To(Equal(body))
+			rendezvousMessage := getSentRendezvousMessage(mockProducer)
+			Expect(rendezvousMessage.RequestData).To(Equal(body))
 		})
 
-		It("should publish a rendezvous request with request timestamp event to pulsar", func() {
+		It("should publish a rendezvous message with request timestamp event to pulsar", func() {
 			// arrange
 			mockProducer.On("Send", mock.Anything).Return(nil).Once()
 			mockListener.On("Read", mock.Anything).Return([]byte(`{ "data": "test" }`), nil)
@@ -111,11 +110,11 @@ var _ = Describe("APIController", func() {
 			controller.HandleRequest(w, req)
 
 			// assert
-			rendezvousRequest := getSentRendezvousRequest(mockProducer)
-			Expect(rendezvousRequest.Events).To(HaveKey("requestTimestamp"))
+			rendezvousMessage := getSentRendezvousMessage(mockProducer)
+			Expect(rendezvousMessage.Events.RequestTimestamp).To(Not(BeZero()))
 		})
 
-		It("should return a 500 status if publishing the rendezvous request fails", func() {
+		It("should return a 500 status if publishing the rendezvous message fails", func() {
 			// arrange
 			mockProducer.On("Send", mock.Anything).Return(errors.New("error publishing rendezvous requeset"))
 
@@ -136,8 +135,8 @@ var _ = Describe("APIController", func() {
 			controller.HandleRequest(w, req)
 
 			// assert
-			rendezvousRequest := getSentRendezvousRequest(mockProducer)
-			expectedSocketAddress := fmt.Sprint("/sockets/" + rendezvousRequest.ID + ".sock")
+			rendezvousMessage := getSentRendezvousMessage(mockProducer)
+			expectedSocketAddress := fmt.Sprint("/sockets/" + rendezvousMessage.ID + ".sock")
 			mockListener.AssertCalled(GinkgoT(), "Read", expectedSocketAddress)
 		})
 

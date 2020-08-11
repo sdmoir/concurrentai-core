@@ -31,15 +31,15 @@ func (controller *APIController) HandleRequest(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	rendezvousRequest := &domain.RendezvousRequest{
-		ID: uuid.New().String(),
-		Events: map[string]interface{}{
-			"requestTimestamp": time.Now(),
+	rendezvousMessage := &domain.RendezvousMessage{
+		ID:          uuid.New().String(),
+		RequestData: string(body),
+		Events: &domain.RendezvousEvents{
+			RequestTimestamp: time.Now(),
 		},
-		Data: string(body),
 	}
 
-	producerPayload, err := json.Marshal(rendezvousRequest)
+	producerPayload, err := json.Marshal(rendezvousMessage)
 	if err != nil {
 		log.Println(errors.Wrap(err, "error encoding rendezvous reqeuest payload"))
 		http.Error(w, "error processing request", http.StatusInternalServerError)
@@ -53,7 +53,7 @@ func (controller *APIController) HandleRequest(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	socketAddress := fmt.Sprintf("/sockets/%s.sock", rendezvousRequest.ID)
+	socketAddress := fmt.Sprintf("/sockets/%s.sock", rendezvousMessage.ID)
 	rendezvousResponse, err := controller.Listener.Read(socketAddress)
 	if err != nil {
 		log.Println(errors.Wrap(err, "error reading rendezvous response from socket"))

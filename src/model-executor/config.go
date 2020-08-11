@@ -7,25 +7,25 @@ import (
 
 // Config : All configuration values needed for the rendezvous api service
 type Config struct {
-	organizationID string
-	serviceID      string
-	modelID        string
-	pulsarURL      string
-	modelEndpoint  string
+	OrganizationID string
+	ServiceID      string
+	ModelID        string
+	ModelEndpoint  string
+	PulsarURL      string
 }
 
 // LoadConfig : Load configuration from environment variables
-func LoadConfig() Config {
-	return Config{
-		organizationID: os.Getenv("ORGANIZATION_ID"),
-		serviceID:      os.Getenv("SERVICE_ID"),
-		modelID:        os.Getenv("MODEL_ID"),
-		pulsarURL:      os.Getenv("PULSAR_URL"),
-		modelEndpoint:  os.Getenv("MODEL_ENDPOINT"),
+func LoadConfig() *Config {
+	return &Config{
+		OrganizationID: os.Getenv("ORGANIZATION_ID"),
+		ServiceID:      os.Getenv("SERVICE_ID"),
+		ModelID:        os.Getenv("MODEL_ID"),
+		ModelEndpoint:  os.Getenv("MODEL_ENDPOINT"),
+		PulsarURL:      os.Getenv("PULSAR_URL"),
 	}
 }
 
 // TopicName : Construct a topic name with the specified suffix
-func (config Config) TopicName(suffix string) string {
-	return fmt.Sprintf("%s/%s/%s", config.organizationID, config.serviceID, suffix)
+func (config *Config) TopicName(suffix string) string {
+	return fmt.Sprintf("%s/%s/%s", config.OrganizationID, config.ServiceID, suffix)
 }

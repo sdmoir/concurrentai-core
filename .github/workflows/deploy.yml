@@ -16,6 +16,7 @@ jobs:
         module:
           - api
           - model-enricher
+          - model-executor
 
     steps:
       - name: Checkout code

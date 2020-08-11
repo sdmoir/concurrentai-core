@@ -2,167 +2,101 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/pkg/errors"
+
+	"github.com/concurrent-ai/rendezvous/src/shared/domain"
+	"github.com/concurrent-ai/rendezvous/src/shared/messaging"
 )
 
-func createPulsarClient(config Config) pulsar.Client {
-	client, err := pulsar.NewClient(pulsar.ClientOptions{
-		URL: config.pulsarURL,
-	})
+func setModelResponse(message *domain.RendezvousMessage, config *Config) error {
+	request := []byte(message.RequestData)
 
+	message.SetModelRequestStart(time.Now())
+	response, err := http.Post(config.ModelEndpoint, "application/json", bytes.NewBuffer(request))
 	if err != nil {
-		log.Fatal("failed to create pulsar client", err)
+		return errors.Wrap(err, "error calling model endpoint")
+	}
+	message.SetModelRequestStop(time.Now())
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return errors.Wrap(err, "error reading model response")
 	}
 
-	return client
+	message.ResponseModelID = config.ModelID
+	message.ResponseData = string(body)
+
+	return nil
 }
 
-func createPulsarConsumer(client pulsar.Client, topic string) pulsar.Consumer {
-	consumer, err := client.Subscribe(pulsar.ConsumerOptions{
-		Topic:            topic,
-		SubscriptionName: fmt.Sprintf("%s-subscription", topic),
-		Type:             pulsar.Shared,
-	})
-
-	if err != nil {
-		log.Fatal("error subscribing to topic:", err)
-	}
-
-	return consumer
-}
-
-func createPulsarProducer(client pulsar.Client, topic string) pulsar.Producer {
-	producer, err := client.CreateProducer(pulsar.ProducerOptions{
-		Topic: topic,
-	})
-
-	if err != nil {
-		log.Fatal("failed to create pulsar producer", err)
-	}
-
-	return producer
-}
-
-func handleNextMessage(consumer pulsar.Consumer, producer pulsar.Producer, config Config) {
+// HandleNextMessage : Execute a model request and forward the response
+func HandleNextMessage(consumer messaging.Consumer, producer messaging.Producer, config *Config) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Printf("panic occurred: %s", err)
 		}
 	}()
 
-	message, err := consumer.Receive(context.Background())
-
-	if err == nil {
-		log.Printf("consumed from topic " + message.Topic() + ": " + string(message.Payload()))
-
-		request, err := parseModelRequest(message)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		response, err := getModelResponse(request, config)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		payload, _ := json.Marshal(response)
-		_, err = producer.Send(context.Background(), &pulsar.ProducerMessage{Payload: payload})
-		if err != nil {
-			log.Println(errors.Wrap(err, "failed to publish message for model response"))
-			return
-		}
-
-		log.Println("published to topic " + producer.Topic() + ": " + string(payload))
-	}
-}
-
-type rendezvousModelRequest struct {
-	id     string
-	events map[string]time.Time
-	body   map[string]interface{}
-}
-
-type rendezvousModelResponse struct {
-	id            string
-	events        map[string]interface{}
-	body          map[string]interface{}
-	modelID       string
-	modelResponse string
-}
-
-func parseModelRequest(message pulsar.Message) (*rendezvousModelRequest, error) {
-	var request *rendezvousModelRequest
-	if err := json.Unmarshal(message.Payload(), &request); err != nil {
-		return nil, errors.Wrap(err, "error parsing rendezvous request from message")
-	}
-	return request, nil
-}
-
-func getModelResponse(request *rendezvousModelRequest, config Config) (*rendezvousModelResponse, error) {
-	requestBody, _ := json.Marshal(request.body)
-
-	startTime := time.Now()
-
-	response, err := http.Post(config.modelEndpoint, "application/json", bytes.NewBuffer(requestBody))
+	payload, err := consumer.Receive()
 	if err != nil {
-		return nil, errors.Wrap(err, "error calling model endpoint")
+		log.Println(err)
+		return
 	}
 
-	defer response.Body.Close()
+	var message *domain.RendezvousMessage
+	if err := json.Unmarshal(payload, &message); err != nil {
+		log.Println(errors.Wrap(err, "failed to parse rendezvous message"))
+		return
+	}
 
-	endTime := time.Now()
-	duration := endTime.Sub(startTime)
+	if err := setModelResponse(message, config); err != nil {
+		log.Println(errors.Wrap(err, "failed to get model response"))
+		return
+	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	payload, err = json.Marshal(message)
 	if err != nil {
-		return nil, errors.Wrap(err, "error reading model response")
+		log.Println(errors.Wrap(err, "failed to encode model response"))
+		return
 	}
 
-	rendezvousResponseEvents := map[string]interface{}{
-		"modelRequestStart":                startTime,
-		"modelRequestStop":                 endTime,
-		"modelRequestDurationMilliseconds": duration.Milliseconds(),
+	if err := producer.Send(payload); err != nil {
+		log.Println(errors.Wrap(err, "failed to send rendezvous message with model response"))
+		return
 	}
 
-	for key, value := range request.events {
-		rendezvousResponseEvents[key] = value
-	}
-
-	rendezvousResponse := &rendezvousModelResponse{
-		id:            request.id,
-		events:        rendezvousResponseEvents,
-		body:          request.body,
-		modelID:       config.modelID,
-		modelResponse: string(body),
-	}
-
-	return rendezvousResponse, nil
+	log.Println("published message: " + string(payload))
 }
 
 func main() {
 	config := LoadConfig()
 
-	client := createPulsarClient(config)
+	client, err := messaging.NewPulsarClient(config.PulsarURL)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer client.Close()
 
-	consumer := createPulsarConsumer(client, config.TopicName("model-input"))
+	consumer, err := client.CreateConsumer(config.TopicName("model-input"))
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer consumer.Close()
 
-	producer := createPulsarProducer(client, config.TopicName("model-response"))
+	producer, err := client.CreateProducer(config.TopicName("model-response"))
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer producer.Close()
 
 	for {
-		handleNextMessage(consumer, producer, config)
+		HandleNextMessage(consumer, producer, config)
 	}
 }

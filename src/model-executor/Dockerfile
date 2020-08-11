@@ -1,11 +1,12 @@
 FROM golang:latest
 
-RUN mkdir /app
+RUN mkdir -p /app/shared
+ADD ./shared /app/shared
 
-ADD . /app
+RUN mkdir /app/model-executor
+ADD ./model-executor /app/model-executor
 
-WORKDIR /app
-
+WORKDIR /app/model-executor
 RUN go build -o main .
 
-CMD ["/app/main"]
+CMD ["/app/model-executor/main"]
