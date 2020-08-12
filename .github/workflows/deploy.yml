@@ -58,7 +58,7 @@ jobs:
 
       - name: Build and tag
         run: |
-          docker build src/${{ matrix.module }} \
+          docker build -f src/${{ matrix.module }}/Dockerfile src \
               -t registry.digitalocean.com/concurrent-ai/rendezvous-${{ matrix.module }}:latest
 
       - name: Push
