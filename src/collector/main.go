@@ -48,8 +48,7 @@ func main() {
 	socketWriter := sockets.NewUnixWriter()
 
 	for {
-		err := HandleNextMessage(consumer, socketWriter)
-		if err != nil {
+		if err := HandleNextMessage(consumer, socketWriter); err != nil {
 			log.Println(err)
 		}
 	}

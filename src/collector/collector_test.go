@@ -51,7 +51,7 @@ var _ = Describe("Collector", func() {
 			Expect(mockConsumer.AssertExpectations(GinkgoT())).To(BeTrue())
 		})
 
-		It("should return an error if it fails to read a message from the consumer", func() {
+		It("should return an error if it fails to read a rendezvous message from the consumer", func() {
 			// arrange
 			mockConsumer.On("Receive").Return(nil, errors.New("read error"))
 
@@ -61,6 +61,18 @@ var _ = Describe("Collector", func() {
 			// assert
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("failed to read rendezvous message from consumer: read error"))
+		})
+
+		It("should return an error if it fails to parse a rendezvous message", func() {
+			// arrange
+			mockConsumer.On("Receive").Return([]byte{}, nil)
+
+			// act
+			err := HandleNextMessage(mockConsumer, mockSocketWriter)
+
+			// assert
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("failed to parse rendezvous message: unexpected end of JSON input"))
 		})
 
 		It("should write the rendezvous message response data to the expected socket", func() {

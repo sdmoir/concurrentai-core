@@ -37,7 +37,7 @@ func setModelResponse(message *domain.RendezvousMessage, config *Config) error {
 }
 
 // HandleNextMessage : Execute a model request and forward the response
-func HandleNextMessage(consumer messaging.Consumer, producer messaging.Producer, config *Config) {
+func HandleNextMessage(consumer messaging.Consumer, producer messaging.Producer, config *Config) error {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Printf("panic occurred: %s", err)
@@ -46,33 +46,29 @@ func HandleNextMessage(consumer messaging.Consumer, producer messaging.Producer,
 
 	payload, err := consumer.Receive()
 	if err != nil {
-		log.Println(err)
-		return
+		return errors.Wrap(err, "failed to read rendezvous message from consumer")
 	}
 
 	var message *domain.RendezvousMessage
 	if err := json.Unmarshal(payload, &message); err != nil {
-		log.Println(errors.Wrap(err, "failed to parse rendezvous message"))
-		return
+		return errors.Wrap(err, "failed to parse rendezvous message")
 	}
 
 	if err := setModelResponse(message, config); err != nil {
-		log.Println(errors.Wrap(err, "failed to get model response"))
-		return
+		return errors.Wrap(err, "failed to get model response")
 	}
 
 	payload, err = json.Marshal(message)
 	if err != nil {
-		log.Println(errors.Wrap(err, "failed to encode model response"))
-		return
+		return errors.Wrap(err, "failed to encode model response")
 	}
 
 	if err := producer.Send(payload); err != nil {
-		log.Println(errors.Wrap(err, "failed to send rendezvous message with model response"))
-		return
+		return errors.Wrap(err, "failed to send rendezvous message with model response")
 	}
 
 	log.Println("published message: " + string(payload))
+	return nil
 }
 
 func main() {
@@ -97,6 +93,8 @@ func main() {
 	defer producer.Close()
 
 	for {
-		HandleNextMessage(consumer, producer, config)
+		if err := HandleNextMessage(consumer, producer, config); err != nil {
+			log.Println(err)
+		}
 	}
 }

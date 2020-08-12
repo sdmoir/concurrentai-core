@@ -3,11 +3,13 @@ package main
 import (
 	"log"
 
+	"github.com/pkg/errors"
+
 	"github.com/concurrent-ai/rendezvous/src/shared/messaging"
 )
 
 // HandleNextMessage : Enrich request data for a rendezvous request
-func HandleNextMessage(consumer messaging.Consumer, producer messaging.Producer) {
+func HandleNextMessage(consumer messaging.Consumer, producer messaging.Producer) error {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Printf("panic occurred: %s", err)
@@ -16,16 +18,15 @@ func HandleNextMessage(consumer messaging.Consumer, producer messaging.Producer)
 
 	payload, err := consumer.Receive()
 	if err != nil {
-		log.Println(err)
-		return
+		return errors.Wrap(err, "failed to read rendezvous message from consumer")
 	}
 
 	if err := producer.Send(payload); err != nil {
-		log.Println(err)
-		return
+		return errors.Wrap(err, "failed to send rendezvous message")
 	}
 
 	log.Println("published message: " + string(payload))
+	return nil
 }
 
 func main() {
@@ -50,6 +51,8 @@ func main() {
 	defer producer.Close()
 
 	for {
-		HandleNextMessage(consumer, producer)
+		if err := HandleNextMessage(consumer, producer); err != nil {
+			log.Println(err)
+		}
 	}
 }

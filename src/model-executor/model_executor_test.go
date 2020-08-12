@@ -2,6 +2,7 @@ package main_test
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 
@@ -29,11 +30,12 @@ func getSentRendezvousMessage(mockProducer *messagingMocks.Producer) *domain.Ren
 var _ = Describe("ModelExecutor", func() {
 	Context("HandleNextMessage", func() {
 		var (
-			testMessage  *domain.RendezvousMessage
-			mockConsumer *messagingMocks.Consumer
-			mockProducer *messagingMocks.Producer
-			fakeServer   *httptest.Server
-			config       *Config
+			testMessage      *domain.RendezvousMessage
+			testMessageBytes []byte
+			mockConsumer     *messagingMocks.Consumer
+			mockProducer     *messagingMocks.Producer
+			fakeServer       *httptest.Server
+			config           *Config
 		)
 
 		BeforeEach(func() {
@@ -42,15 +44,12 @@ var _ = Describe("ModelExecutor", func() {
 				RequestData: "test request",
 			}
 
-			testMessageBytes, _ := json.Marshal(testMessage)
+			testMessageBytes, _ = json.Marshal(testMessage)
 			mockConsumer = &messagingMocks.Consumer{}
-			mockConsumer.On("Receive").Return(testMessageBytes, nil)
+			mockProducer = &messagingMocks.Producer{}
 
 			fakeModelResponse := []byte("test response")
 			fakeServer = createFakeServer(fakeModelResponse)
-
-			mockProducer = &messagingMocks.Producer{}
-			mockProducer.On("Send", mock.Anything).Return(nil)
 
 			config = &Config{
 				OrganizationID: "TestOrg",
@@ -66,6 +65,10 @@ var _ = Describe("ModelExecutor", func() {
 		})
 
 		It("should publish the received rendezvous message with the model id", func() {
+			// arrange
+			mockConsumer.On("Receive").Return(testMessageBytes, nil)
+			mockProducer.On("Send", mock.Anything).Return(nil)
+
 			// act
 			HandleNextMessage(mockConsumer, mockProducer, config)
 
@@ -75,6 +78,10 @@ var _ = Describe("ModelExecutor", func() {
 		})
 
 		It("should publish the received rendezvous message with the model response", func() {
+			// arrange
+			mockConsumer.On("Receive").Return(testMessageBytes, nil)
+			mockProducer.On("Send", mock.Anything).Return(nil)
+
 			// act
 			HandleNextMessage(mockConsumer, mockProducer, config)
 
@@ -84,6 +91,10 @@ var _ = Describe("ModelExecutor", func() {
 		})
 
 		It("should publish the received rendezvous message with a model request start event", func() {
+			// arrange
+			mockConsumer.On("Receive").Return(testMessageBytes, nil)
+			mockProducer.On("Send", mock.Anything).Return(nil)
+
 			// act
 			HandleNextMessage(mockConsumer, mockProducer, config)
 
@@ -94,6 +105,10 @@ var _ = Describe("ModelExecutor", func() {
 		})
 
 		It("should publish the received rendezvous message with a model request stop event", func() {
+			// arrange
+			mockConsumer.On("Receive").Return(testMessageBytes, nil)
+			mockProducer.On("Send", mock.Anything).Return(nil)
+
 			// act
 			HandleNextMessage(mockConsumer, mockProducer, config)
 
@@ -101,6 +116,56 @@ var _ = Describe("ModelExecutor", func() {
 			rendezvousMessage := getSentRendezvousMessage(mockProducer)
 			Expect(rendezvousMessage.Events).To(Not(BeNil()))
 			Expect(rendezvousMessage.Events.ModelRequestStop).To(Not(BeZero()))
+		})
+
+		It("should return an error if it fails to read a rendezvous message from the consumer", func() {
+			// arrange
+			mockConsumer.On("Receive").Return(nil, errors.New("read error"))
+
+			// act
+			err := HandleNextMessage(mockConsumer, mockProducer, config)
+
+			// assert
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("failed to read rendezvous message from consumer: read error"))
+		})
+
+		It("should return an error if it fails to parse a rendezvous message", func() {
+			// arrange
+			mockConsumer.On("Receive").Return([]byte{}, nil)
+
+			// act
+			err := HandleNextMessage(mockConsumer, mockProducer, config)
+
+			// assert
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("failed to parse rendezvous message: unexpected end of JSON input"))
+		})
+
+		It("should return an error if it fails to get the model response", func() {
+			// arrange
+			mockConsumer.On("Receive").Return(testMessageBytes, nil)
+			config.ModelEndpoint = ""
+
+			// act
+			err := HandleNextMessage(mockConsumer, mockProducer, config)
+
+			// assert
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal(`failed to get model response: error calling model endpoint: Post "": unsupported protocol scheme ""`))
+		})
+
+		It("should return an error if it fails to send the rendezvous message with the model response", func() {
+			// arrange
+			mockConsumer.On("Receive").Return(testMessageBytes, nil)
+			mockProducer.On("Send", mock.Anything).Return(errors.New("send error"))
+
+			// act
+			err := HandleNextMessage(mockConsumer, mockProducer, config)
+
+			// assert
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("failed to send rendezvous message with model response: send error"))
 		})
 	})
 })
