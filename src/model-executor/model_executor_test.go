@@ -40,7 +40,7 @@ var _ = Describe("ModelExecutor", func() {
 
 		BeforeEach(func() {
 			testMessage = &domain.RendezvousMessage{
-				ID:          "TestID",
+				ID:          "test message",
 				RequestData: "test request",
 			}
 
@@ -52,9 +52,9 @@ var _ = Describe("ModelExecutor", func() {
 			fakeServer = createFakeServer(fakeModelResponse)
 
 			config = &Config{
-				OrganizationID: "TestOrg",
-				ServiceID:      "TestService",
-				ModelID:        "TestModel",
+				OrganizationID: "test org",
+				ServiceID:      "test service",
+				ModelID:        "test model",
 				ModelEndpoint:  fakeServer.URL,
 				PulsarURL:      "pulsar://test:6650",
 			}
@@ -74,7 +74,7 @@ var _ = Describe("ModelExecutor", func() {
 
 			// assert
 			rendezvousMessage := getSentRendezvousMessage(mockProducer)
-			Expect(rendezvousMessage.ResponseModelID).To(Equal("TestModel"))
+			Expect(rendezvousMessage.ResponseModelID).To(Equal("test message"))
 		})
 
 		It("should publish the received rendezvous message with the model response", func() {

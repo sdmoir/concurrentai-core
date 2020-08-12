@@ -21,6 +21,7 @@ var _ = Describe("Collector", func() {
 			fakeSocketAddress string
 			mockConsumer      *messagingMocks.Consumer
 			mockSocketWriter  *socketMocks.Writer
+			config            *Config
 		)
 
 		BeforeEach(func() {
@@ -36,6 +37,10 @@ var _ = Describe("Collector", func() {
 
 			fakeSocketAddress = "/sockets/" + testMessage.ID + ".sock"
 			mockSocketWriter = &socketMocks.Writer{}
+
+			config = &Config{
+				ActiveModelID: "test model",
+			}
 		})
 
 		It("should read a rendezvous message from the consumer", func() {
@@ -44,7 +49,7 @@ var _ = Describe("Collector", func() {
 			mockSocketWriter.On("Write", fakeSocketAddress, []byte(testMessage.ResponseData)).Return(nil)
 
 			// act
-			err := HandleNextMessage(mockConsumer, mockSocketWriter)
+			err := HandleNextMessage(mockConsumer, mockSocketWriter, config)
 
 			// assert
 			Expect(err).To(Not(HaveOccurred()))
@@ -56,7 +61,7 @@ var _ = Describe("Collector", func() {
 			mockConsumer.On("Receive").Return(nil, errors.New("read error"))
 
 			// act
-			err := HandleNextMessage(mockConsumer, mockSocketWriter)
+			err := HandleNextMessage(mockConsumer, mockSocketWriter, config)
 
 			// assert
 			Expect(err).To(HaveOccurred())
@@ -68,7 +73,7 @@ var _ = Describe("Collector", func() {
 			mockConsumer.On("Receive").Return([]byte{}, nil)
 
 			// act
-			err := HandleNextMessage(mockConsumer, mockSocketWriter)
+			err := HandleNextMessage(mockConsumer, mockSocketWriter, config)
 
 			// assert
 			Expect(err).To(HaveOccurred())
@@ -81,7 +86,7 @@ var _ = Describe("Collector", func() {
 			mockSocketWriter.On("Write", fakeSocketAddress, []byte(testMessage.ResponseData)).Return(nil)
 
 			// act
-			err := HandleNextMessage(mockConsumer, mockSocketWriter)
+			err := HandleNextMessage(mockConsumer, mockSocketWriter, config)
 
 			// assert
 			Expect(err).To(Not(HaveOccurred()))
@@ -94,11 +99,25 @@ var _ = Describe("Collector", func() {
 			mockSocketWriter.On("Write", fakeSocketAddress, []byte(testMessage.ResponseData)).Return(errors.New("write error"))
 
 			// act
-			err := HandleNextMessage(mockConsumer, mockSocketWriter)
+			err := HandleNextMessage(mockConsumer, mockSocketWriter, config)
 
 			// assert
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("failed to write rendezvous message response data to socket: write error"))
+		})
+
+		It("should not write the rendezvous message response data if not for the active model", func() {
+			// arrange
+			mockConsumer.On("Receive").Return(testMessageBytes, nil)
+			mockSocketWriter.On("Write", fakeSocketAddress, []byte(testMessage.ResponseData)).Return(nil)
+			config.ActiveModelID = "other model"
+
+			// act
+			err := HandleNextMessage(mockConsumer, mockSocketWriter, config)
+
+			// assert
+			Expect(err).To(Not(HaveOccurred()))
+			Expect(mockSocketWriter.AssertNotCalled(GinkgoT(), "Write", fakeSocketAddress, []byte(testMessage.ResponseData))).To(BeTrue())
 		})
 	})
 })

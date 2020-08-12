@@ -1,7 +1,6 @@
 package sockets
 
 import (
-	"log"
 	"io/ioutil"
 	"net"
 	"os"
@@ -50,7 +49,7 @@ type UnixWriter struct {
 func NewUnixWriter() *UnixWriter {
 	return &UnixWriter{
 		SocketDiscoveryIntervalMilliseconds: 10,
-		SocketDiscoveryTimeoutMilliseconds:  30000,
+		SocketDiscoveryTimeoutMilliseconds:  3000,
 	}
 }
 
@@ -61,7 +60,6 @@ func (unixWriter *UnixWriter) Write(socketAddress string, data []byte) error {
 
 	// Wait for socket to exist if it does not already
 	for i := 0; i <= timeout; i += interval {
-		log.Println("Checking for socket " + socketAddress)
 		if _, err := os.Stat(socketAddress); os.IsNotExist(err) {
 			if (i + interval) < timeout {
 				time.Sleep(10 * time.Millisecond)

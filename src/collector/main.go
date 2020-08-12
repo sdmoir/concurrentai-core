@@ -13,7 +13,7 @@ import (
 )
 
 // HandleNextMessage : Receive a rendezvous message and write the model response to the expected socket
-func HandleNextMessage(consumer messaging.Consumer, socketWriter sockets.Writer) error {
+func HandleNextMessage(consumer messaging.Consumer, socketWriter sockets.Writer, config *Config) error {
 	payload, err := consumer.Receive()
 	if err != nil {
 		return errors.Wrap(err, "failed to read rendezvous message from consumer")
@@ -22,6 +22,10 @@ func HandleNextMessage(consumer messaging.Consumer, socketWriter sockets.Writer)
 	var message *domain.RendezvousMessage
 	if err := json.Unmarshal(payload, &message); err != nil {
 		return errors.Wrap(err, "failed to parse rendezvous message")
+	}
+
+	if message.ResponseModelID != config.ActiveModelID {
+		return nil
 	}
 
 	socketAddress := fmt.Sprintf("/sockets/%s.sock", message.ID)
@@ -49,7 +53,7 @@ func main() {
 	socketWriter := sockets.NewUnixWriter()
 
 	for {
-		if err := HandleNextMessage(consumer, socketWriter); err != nil {
+		if err := HandleNextMessage(consumer, socketWriter, config); err != nil {
 			log.Println(err)
 		}
 	}
