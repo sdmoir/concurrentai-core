@@ -1,11 +1,12 @@
 FROM golang:latest
 
-RUN mkdir /app
+RUN mkdir -p /app/shared
+ADD ./shared /app/shared
 
-ADD . /app
+RUN mkdir /app/collector
+ADD ./collector /app/collector
 
-WORKDIR /app
-
+WORKDIR /app/collector
 RUN go build -o main .
 
-CMD ["/app/main"]
+CMD ["/app/collector/main"]

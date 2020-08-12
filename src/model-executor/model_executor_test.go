@@ -2,15 +2,15 @@ package main_test
 
 import (
 	"encoding/json"
-	"github.com/concurrent-ai/rendezvous/src/shared/domain"
-	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/mock"
 
 	. "github.com/concurrent-ai/rendezvous/src/model-executor"
+	"github.com/concurrent-ai/rendezvous/src/shared/domain"
 	messagingMocks "github.com/concurrent-ai/rendezvous/src/shared/messaging/mocks"
 )
 
