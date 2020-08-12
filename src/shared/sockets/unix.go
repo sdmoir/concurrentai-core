@@ -1,6 +1,7 @@
 package sockets
 
 import (
+	"log"
 	"io/ioutil"
 	"net"
 	"os"
@@ -60,9 +61,10 @@ func (unixWriter *UnixWriter) Write(socketAddress string, data []byte) error {
 
 	// Wait for socket to exist if it does not already
 	for i := 0; i <= timeout; i += interval {
+		log.Println("Checking for socket " + socketAddress)
 		if _, err := os.Stat(socketAddress); os.IsNotExist(err) {
 			if (i + interval) < timeout {
-				time.Sleep(time.Duration(interval) * time.Millisecond)
+				time.Sleep(10 * time.Millisecond)
 			} else {
 				return errors.Wrap(err, "timed out waiting for socket")
 			}
