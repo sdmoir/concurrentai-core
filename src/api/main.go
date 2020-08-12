@@ -54,6 +54,7 @@ func (controller *APIController) HandleRequest(w http.ResponseWriter, r *http.Re
 	}
 
 	socketAddress := fmt.Sprintf("/sockets/%s.sock", rendezvousMessage.ID)
+	log.Println("Waiting for response at " + socketAddress)
 	rendezvousResponse, err := controller.Listener.Read(socketAddress)
 	if err != nil {
 		log.Println(errors.Wrap(err, "error reading rendezvous response from socket"))

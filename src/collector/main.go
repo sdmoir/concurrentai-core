@@ -25,6 +25,7 @@ func HandleNextMessage(consumer messaging.Consumer, socketWriter sockets.Writer)
 	}
 
 	socketAddress := fmt.Sprintf("/sockets/%s.sock", message.ID)
+	log.Println("Writing response to " + socketAddress)
 	if err := socketWriter.Write(socketAddress, []byte(message.ResponseData)); err != nil {
 		return errors.Wrap(err, "failed to write rendezvous message response data to socket")
 	}
