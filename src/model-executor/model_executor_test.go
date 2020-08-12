@@ -74,7 +74,7 @@ var _ = Describe("ModelExecutor", func() {
 
 			// assert
 			rendezvousMessage := getSentRendezvousMessage(mockProducer)
-			Expect(rendezvousMessage.ResponseModelID).To(Equal("test message"))
+			Expect(rendezvousMessage.ResponseModelID).To(Equal("test model"))
 		})
 
 		It("should publish the received rendezvous message with the model response", func() {
