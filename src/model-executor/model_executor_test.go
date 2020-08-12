@@ -48,7 +48,7 @@ var _ = Describe("ModelExecutor", func() {
 			mockConsumer = &messagingMocks.Consumer{}
 			mockProducer = &messagingMocks.Producer{}
 
-			fakeModelResponse := []byte("test response")
+			fakeModelResponse := []byte(`["test response"]`)
 			fakeServer = createFakeServer(fakeModelResponse)
 
 			config = &Config{
@@ -87,7 +87,7 @@ var _ = Describe("ModelExecutor", func() {
 
 			// assert
 			rendezvousMessage := getSentRendezvousMessage(mockProducer)
-			Expect(rendezvousMessage.ResponseData).To(Equal("test response"))
+			Expect(rendezvousMessage.ResponseData).To(Equal(`{ "results": ["test response"] }`))
 		})
 
 		It("should publish the received rendezvous message with a model request start event", func() {

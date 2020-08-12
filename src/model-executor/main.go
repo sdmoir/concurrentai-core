@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -31,7 +32,7 @@ func setModelResponse(message *domain.RendezvousMessage, config *Config) error {
 	}
 
 	message.ResponseModelID = config.ModelID
-	message.ResponseData = string(body)
+	message.ResponseData = fmt.Sprintf("{ \"results\": %s }", string(body))
 
 	return nil
 }
