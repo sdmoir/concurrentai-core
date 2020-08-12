@@ -36,7 +36,7 @@ func (client *PulsarClient) CreateConsumer(topic string) (*PulsarConsumer, error
 	consumer, err := client.internalClient.Subscribe(pulsar.ConsumerOptions{
 		Topic:            topic,
 		SubscriptionName: fmt.Sprintf("%s-subscription", topic),
-		Type:             pulsar.Shared,
+		Type:             pulsar.Exclusive,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create pulsar consumer")
