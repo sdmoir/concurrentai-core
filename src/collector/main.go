@@ -45,7 +45,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	consumer, err := client.CreateConsumer(config.TopicName("model-response"))
+	topic := config.TopicName("model-response")
+	subscription := config.SubscriptionName("model-response")
+	consumer, err := client.CreateConsumer(topic, subscription)
 	if err != nil {
 		log.Fatal(err)
 	}

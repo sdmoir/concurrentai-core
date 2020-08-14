@@ -2,7 +2,6 @@ package messaging
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/pkg/errors"
@@ -32,11 +31,11 @@ func (client *PulsarClient) CreateProducer(topic string) (*PulsarProducer, error
 }
 
 // CreateConsumer : Create a new Pulsar consumer
-func (client *PulsarClient) CreateConsumer(topic string) (*PulsarConsumer, error) {
+func (client *PulsarClient) CreateConsumer(topic string, subscriptionName string) (*PulsarConsumer, error) {
 	consumer, err := client.internalClient.Subscribe(pulsar.ConsumerOptions{
 		Topic:            topic,
-		SubscriptionName: fmt.Sprintf("%s-subscription", topic),
-		Type:             pulsar.Exclusive,
+		SubscriptionName: subscriptionName,
+		Type:             pulsar.Shared,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create pulsar consumer")

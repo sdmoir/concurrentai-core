@@ -17,13 +17,13 @@ func (_m *Client) Close() {
 	_m.Called()
 }
 
-// CreateConsumer provides a mock function with given fields: topic
-func (_m *Client) CreateConsumer(topic string) messaging.Consumer {
-	ret := _m.Called(topic)
+// CreateConsumer provides a mock function with given fields: topic, subscriptionName
+func (_m *Client) CreateConsumer(topic string, subscriptionName string) messaging.Consumer {
+	ret := _m.Called(topic, subscriptionName)
 
 	var r0 messaging.Consumer
-	if rf, ok := ret.Get(0).(func(string) messaging.Consumer); ok {
-		r0 = rf(topic)
+	if rf, ok := ret.Get(0).(func(string, string) messaging.Consumer); ok {
+		r0 = rf(topic, subscriptionName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(messaging.Consumer)

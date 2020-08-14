@@ -27,3 +27,8 @@ func LoadConfig() *Config {
 func (config *Config) TopicName(suffix string) string {
 	return fmt.Sprintf("%s/%s/%s", config.OrganizationID, config.ServiceID, suffix)
 }
+
+// SubscriptionName : Construct a subscription name with the specified suffix
+func (config *Config) SubscriptionName(suffix string) string {
+	return fmt.Sprintf("%s/%s/%s-subscription", config.OrganizationID, config.ServiceID, suffix)
+}

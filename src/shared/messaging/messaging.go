@@ -3,7 +3,7 @@ package messaging
 // Client : A client that can create producers and consumers
 type Client interface {
 	CreateProducer(topic string) Producer
-	CreateConsumer(topic string) Consumer
+	CreateConsumer(topic string, subscriptionName string) Consumer
 	Close()
 }
 

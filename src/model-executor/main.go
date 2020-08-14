@@ -81,7 +81,9 @@ func main() {
 	}
 	defer client.Close()
 
-	consumer, err := client.CreateConsumer(config.TopicName("model-input"))
+	topic := config.TopicName("model-input")
+	subscription := config.SubscriptionName("model-input")
+	consumer, err := client.CreateConsumer(topic, subscription)
 	if err != nil {
 		log.Fatal(err)
 	}
