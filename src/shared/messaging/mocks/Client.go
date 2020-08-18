@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	messaging "github.com/concurrent-ai/rendezvous/src/shared/messaging"
+	messaging "github.com/concurrentai/concurrentai-core/src/shared/messaging"
 	mock "github.com/stretchr/testify/mock"
 )
 

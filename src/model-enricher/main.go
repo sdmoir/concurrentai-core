@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/concurrent-ai/rendezvous/src/shared/messaging"
+	"github.com/concurrentai/concurrentai-core/src/shared/messaging"
 )
 
 // HandleNextMessage : Enrich request data for a rendezvous request

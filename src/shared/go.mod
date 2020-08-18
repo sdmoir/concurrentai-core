@@ -1,4 +1,4 @@
-module github.com/concurrent-ai/rendezvous/src/shared
+module github.com/concurrentai/concurrentai-core/src/shared
 
 go 1.14
 

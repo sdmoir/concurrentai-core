@@ -15,10 +15,10 @@ jobs:
     strategy:
       matrix:
         module:
-          - api
           - model-enricher
           - model-executor
-          - collector
+          - rendezvous-api
+          - rendezvous-collector
 
     steps:
       - name: Checkout code
@@ -37,16 +37,16 @@ jobs:
     strategy:
       matrix:
         module:
-          - api
           - model-enricher
           - model-executor
-          - collector
+          - rendezvous-api
+          - rendezvous-collector
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build and push Docker images
+      - name: Build Docker images
         uses: docker/build-push-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}

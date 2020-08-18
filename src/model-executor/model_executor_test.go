@@ -10,9 +10,9 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
 
-	. "github.com/concurrent-ai/rendezvous/src/model-executor"
-	"github.com/concurrent-ai/rendezvous/src/shared/domain"
-	messagingMocks "github.com/concurrent-ai/rendezvous/src/shared/messaging/mocks"
+	. "github.com/concurrentai/concurrentai-core/src/model-executor"
+	"github.com/concurrentai/concurrentai-core/src/shared/domain"
+	messagingMocks "github.com/concurrentai/concurrentai-core/src/shared/messaging/mocks"
 )
 
 func createFakeServer(response []byte) *httptest.Server {

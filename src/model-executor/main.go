@@ -11,8 +11,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/concurrent-ai/rendezvous/src/shared/domain"
-	"github.com/concurrent-ai/rendezvous/src/shared/messaging"
+	"github.com/concurrentai/concurrentai-core/src/shared/domain"
+	"github.com/concurrentai/concurrentai-core/src/shared/messaging"
 )
 
 func setModelResponse(message *domain.RendezvousMessage, config *Config) error {

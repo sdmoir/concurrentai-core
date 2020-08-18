@@ -1,4 +1,4 @@
-module github.com/concurrentai/concurrentai-core/src/model-enricher
+module github.com/concurrentai/concurrentai-core/src/rendezvous-collector
 
 go 1.14
 

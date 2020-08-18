@@ -6,8 +6,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/concurrent-ai/rendezvous/src/model-enricher"
-	messagingMocks "github.com/concurrent-ai/rendezvous/src/shared/messaging/mocks"
+	. "github.com/concurrentai/concurrentai-core/src/model-enricher"
+	messagingMocks "github.com/concurrentai/concurrentai-core/src/shared/messaging/mocks"
 )
 
 var _ = Describe("ModelEnricher", func() {
