@@ -13,10 +13,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 
-	. "github.com/concurrent-ai/rendezvous/src/api"
-	"github.com/concurrent-ai/rendezvous/src/shared/domain"
-	messagingMocks "github.com/concurrent-ai/rendezvous/src/shared/messaging/mocks"
-	socketMocks "github.com/concurrent-ai/rendezvous/src/shared/sockets/mocks"
+	. "github.com/concurrentai/concurrentai-core/src/rendezvous-api"
+	"github.com/concurrentai/concurrentai-core/src/shared/domain"
+	messagingMocks "github.com/concurrentai/concurrentai-core/src/shared/messaging/mocks"
+	socketMocks "github.com/concurrentai/concurrentai-core/src/shared/sockets/mocks"
 )
 
 type badReader int

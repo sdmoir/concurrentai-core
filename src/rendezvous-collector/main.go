@@ -7,9 +7,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/concurrent-ai/rendezvous/src/shared/domain"
-	"github.com/concurrent-ai/rendezvous/src/shared/messaging"
-	"github.com/concurrent-ai/rendezvous/src/shared/sockets"
+	"github.com/concurrentai/concurrentai-core/src/shared/domain"
+	"github.com/concurrentai/concurrentai-core/src/shared/messaging"
+	"github.com/concurrentai/concurrentai-core/src/shared/sockets"
 )
 
 // HandleNextMessage : Receive a rendezvous message and write the model response to the expected socket

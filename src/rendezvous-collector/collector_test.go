@@ -7,10 +7,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/concurrent-ai/rendezvous/src/collector"
-	"github.com/concurrent-ai/rendezvous/src/shared/domain"
-	messagingMocks "github.com/concurrent-ai/rendezvous/src/shared/messaging/mocks"
-	socketMocks "github.com/concurrent-ai/rendezvous/src/shared/sockets/mocks"
+	. "github.com/concurrentai/concurrentai-core/src/rendezvous-collector"
+	"github.com/concurrentai/concurrentai-core/src/shared/domain"
+	messagingMocks "github.com/concurrentai/concurrentai-core/src/shared/messaging/mocks"
+	socketMocks "github.com/concurrentai/concurrentai-core/src/shared/sockets/mocks"
 )
 
 var _ = Describe("Collector", func() {
