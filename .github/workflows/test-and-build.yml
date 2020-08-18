@@ -15,10 +15,10 @@ jobs:
     strategy:
       matrix:
         module:
-          - api
           - model-enricher
           - model-executor
-          - collector
+          - rendezvous-api
+          - rendezvous-collector
 
     steps:
       - name: Checkout code
@@ -37,10 +37,10 @@ jobs:
     strategy:
       matrix:
         module:
-          - api
           - model-enricher
           - model-executor
-          - collector
+          - rendezvous-api
+          - rendezvous-collector
 
     steps:
       - name: Checkout code
