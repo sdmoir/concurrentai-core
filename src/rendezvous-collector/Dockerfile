@@ -3,10 +3,10 @@ FROM golang:latest
 RUN mkdir -p /app/shared
 ADD ./shared /app/shared
 
-RUN mkdir /app/collector
-ADD ./collector /app/collector
+RUN mkdir /app/rendezvous-collector
+ADD ./rendezvous-collector /app/rendezvous-collector
 
-WORKDIR /app/collector
+WORKDIR /app/rendezvous-collector
 RUN go build -o main .
 
-CMD ["/app/collector/main"]
+CMD ["/app/rendezvous-collector/main"]
