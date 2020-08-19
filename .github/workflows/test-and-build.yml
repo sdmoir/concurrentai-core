@@ -54,6 +54,5 @@ jobs:
           repository: concurrentai/concurrentai-core-${{ matrix.module }}
           path: src
           dockerfile: src/${{ matrix.module }}/Dockerfile
-          tag_with_sha: true
           tags: latest
           push: false
