@@ -10,4 +10,4 @@ Concurrent.ai is a generalized manifestation of the Rendezvous architecture deta
 
 ### Core Components
 
-![Core Components](https://github.com/concurrentai/concurrentai-core/raw/master/Concurrent.ai%20Core%20Components%20.png)
+![Core Components](https://github.com/concurrentai/concurrentai-core/raw/master/misc/diagrams/Concurrent.ai%20Core%20Components.png)
