@@ -1,6 +1,8 @@
+# concurrentai-core
+
 ![Header](https://github.com/concurrentai/concurrentai-core/raw/master/misc/images/header.png)
 
-# concurrentai-core
+Concurrent.ai is a platform that enables you to get started with machine learning in a rapid and evolvable way.
 
 ## Getting Started
 
@@ -8,7 +10,7 @@ This repo contains the core components for Concurrent.ai. If you're looking to g
 
 ## Background
 
-From a business perspective, Concurrent.ai is a platform that enables businesses to get started with machine learning in a rapid and evolvable way. From a technical perspective, it is a generalized manifestation of the Rendezvous architecture detailed by Ted Dunning and Ellen Friedman in [Machine Learning Logistics](https://www.oreilly.com/library/view/machine-learning-logistics/9781491997628/).
+From a technical perspective, Concurrent.ai is a generalized manifestation of the Rendezvous architecture detailed by Ted Dunning and Ellen Friedman in [Machine Learning Logistics](https://www.oreilly.com/library/view/machine-learning-logistics/9781491997628/).
 
 ### What is the Rendezvous architecture?
 
