@@ -31,4 +31,4 @@ Although there are many benefits that the Rendezvous architecture offers, one ma
 
 ## Core Components
 
-![Core Components](https://github.com/concurrentai/concurrentai-core/raw/master/Concurrent.ai%20Core%20Components%20.png)
+![Core Components](https://github.com/concurrentai/concurrentai-core/raw/master/misc/diagrams/Concurrent.ai%20Core%20Components.png)
