@@ -1,12 +1,12 @@
-# concurrentai-core
-
 ![Header](https://github.com/concurrentai/concurrentai-core/raw/master/misc/images/header.png)
 
 Concurrent.ai is a platform that enables you to get started with machine learning in a rapid and evolvable way.
 
+# concurrentai-core
+
 ## Getting Started
 
-This repo contains the core components for Concurrent.ai. If you're looking to get started experimenting with your own Concurrent.ai stack, see [concurrentai/concurrentai-infra](https://github.com/concurrentai/concurrentai-infra).
+This repo contains the core components for Concurrent.ai. If you're looking to start experimenting with your own Concurrent.ai stack, see **[concurrentai/concurrentai-infra](https://github.com/concurrentai/concurrentai-infra)**.
 
 ## Background
 
