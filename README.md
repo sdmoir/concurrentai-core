@@ -42,12 +42,12 @@ The entrypoint for handling inference requests over HTTP/HTTPS. [Read more →](
 
 #### Model Enricher
 
-_In Progress_ – A background service that can transform can trasform input data or provide supplemental data before processing an inference request. [Read more →]()
+_In Progress_. Optionally transforms input data and/or provides supplemental data before processing an inference request. [Read more →]()
 
 #### Model Executor
 
-A background service (per model) that executes the acutal inferences request for the model and forwards thee result. [Read more →]()
+Executes the acutal inference request for the model and forwards the response. [Read more →]()
 
 #### Rendezvous Collector
 
-A background service that receives model responses asyncronously as they are processed and returns the response for the active model back to the API. [Read more →]()
+Receives model responses asyncronously as they are processed and returns the "active" model's response back to the API. [Read more →]()
