@@ -40,19 +40,19 @@ All of the benefits that come along with a Rendezvous architecture: auto-scaling
 
 #### Rendezvous API
 
-The entrypoint for handling inference requests over HTTP/HTTPS. [Read more →]()
+The entrypoint for handling inference requests over HTTP/HTTPS. [Read more →](https://github.com/concurrentai/concurrentai-core/tree/src/rendezvous-api/readme)
 
 #### Model Enricher
 
-_In Progress_. Optionally transforms input data and/or provides supplemental data before processing an inference request. [Read more →]()
+_In Progress_. Optionally transforms input data and/or provides supplemental data before processing an inference request. [Read more →](https://github.com/concurrentai/concurrentai-core/tree/src/model-enricher/readme)
 
 #### Model Executor(s)
 
-Executes the acutal inference request for each model and forwards the response. [Read more →]()
+Executes the acutal inference request for each model and forwards the response. [Read more →](https://github.com/concurrentai/concurrentai-core/tree/src/model-executor/readme)
 
 #### Rendezvous Collector
 
-Receives model responses asyncronously as they are processed and returns the "active" model's response back to the API. [Read more →]()
+Receives model responses asyncronously as they are processed and returns the "active" model's response back to the API. [Read more →](https://github.com/concurrentai/concurrentai-core/tree/src/rendezvous-collector/readme)
 
 ## Development
 
