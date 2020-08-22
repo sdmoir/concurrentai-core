@@ -44,9 +44,9 @@ The entrypoint for handling inference requests over HTTP/HTTPS. [Read more →](
 
 _In Progress_. Optionally transforms input data and/or provides supplemental data before processing an inference request. [Read more →]()
 
-#### Model Executor
+#### Model Executor(s)
 
-Executes the acutal inference request for the model and forwards the response. [Read more →]()
+Executes the acutal inference request for each model and forwards the response. [Read more →]()
 
 #### Rendezvous Collector
 
