@@ -51,3 +51,47 @@ Executes the acutal inference request for each model and forwards the response. 
 #### Rendezvous Collector
 
 Receives model responses asyncronously as they are processed and returns the "active" model's response back to the API. [Read more →]()
+
+## Development
+
+The core Concurrent.ai components are written in [Go](https://golang.org/).
+
+### Running Locally
+
+Follow the Getting Started guide in [concurrentai/concurrentai-infra](https://github.com/concurrentai/concurrentai-infra) to run a local Concurrent.ai stack via Minikube.
+
+### Testing
+
+#### Unit/Micro Tests
+
+```bash
+# model-enricher
+cd src/model-enricher && go test ./...
+
+# model-executor
+cd src/model-executor && go test ./...
+
+# rendezvous-api
+cd src/rendezvous-api && go test ./...
+
+# rendezvous-collector
+cd src/rendezvous-collector && go test ./...
+```
+
+#### Integration Tests
+
+_Coming Soon_
+
+### Contribution Guide
+
+Contributions welcome! Some general guidelines:
+- [Scannability and readability](https://www.geepawhill.org/2019/03/20/refactoring-pro-tip-i-optimize-scannability-then-readability-then-writability/) are top priorities
+- Test-driven development is encouraged but not required
+
+## Core Roadmap
+
+- Build initial Analysis Collector with support for Elasticsearch
+- Integrate Pulsar Functions to enable:
+  - Deploying non-ML business logic
+  - Creating custom model enrichers and transformation functions
+
