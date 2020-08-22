@@ -54,6 +54,10 @@ Executes the acutal inference request for each model and forwards the response. 
 
 Receives model responses asyncronously as they are processed and returns the "active" model's response back to the API. [Read more →](https://github.com/concurrentai/concurrentai-core/tree/readme/src/rendezvous-collector)
 
+#### Analysis Collector
+
+_Not yet implemented_. Receives all model responses asyncronously and forwards them to an external system such as Elasticsearch for further analysis.
+
 ## Development
 
 The core Concurrent.ai components are written in [Go](https://golang.org/).
