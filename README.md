@@ -5,6 +5,8 @@ Concurrent.ai is a platform that enables you to get started with machine learnin
 # concurrentai-core
 
 - [Overview](https://github.com/concurrentai/concurrentai-core/tree/readme#getting-started)
+- [Development](https://github.com/concurrentai/concurrentai-core/tree/readme#development)
+- [Core Roadmap](https://github.com/concurrentai/concurrentai-core/tree/readme#core-roadmap)
 
 ## Overview
 
