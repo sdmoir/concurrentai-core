@@ -6,13 +6,13 @@ Concurrent.ai is a platform that enables you to get started with machine learnin
 
 - [Overview](https://github.com/concurrentai/concurrentai-core/tree/readme#getting-started)
 - [Development](https://github.com/concurrentai/concurrentai-core/tree/readme#development)
-- [Core Roadmap](https://github.com/concurrentai/concurrentai-core/tree/readme#core-roadmap)
+- [Roadmap](https://github.com/concurrentai/concurrentai-core/tree/readme#roadmap)
 
-## Overview
+## Getting Started
 
-### Getting Started
+See **[concurrentai/concurrentai-infra](https://github.com/concurrentai/concurrentai-infra)** to start experimenting with your own Concurrent.ai stack.
 
-This repo contains the core components for Concurrent.ai. If you're looking to start experimenting with your own Concurrent.ai stack, see **[concurrentai/concurrentai-infra](https://github.com/concurrentai/concurrentai-infra)**.
+## Concurrent.ai Overview
 
 ### Background
 
@@ -36,7 +36,7 @@ All of the benefits that come along with a Rendezvous architecture: auto-scaling
 
 ### Core Components
 
-![Core Components](https://github.com/concurrentai/concurrentai-core/raw/master/misc/diagrams/Concurrent.ai%20Core%20Components.png)
+![Core Components](misc/diagrams/Concurrent.ai%20Core%20Components.png)
 
 #### Rendezvous API
 
@@ -58,46 +58,16 @@ Receives model responses asyncronously as they are processed and returns the "ac
 
 _Not yet implemented_. Receives all model responses asyncronously and forwards them to an external system such as Elasticsearch for further analysis.
 
-## Development
+## Roadmap
 
-The core Concurrent.ai components are written in [Go](https://golang.org/).
+See the [Concurrent.ai Roadmap](https://github.com/orgs/concurrentai/projects/1) project for an up-to-date roadmap.
 
-### Running Locally
+## Contributing
 
-Follow the Getting Started guide in [concurrentai/concurrentai-infra](https://github.com/concurrentai/concurrentai-infra) to run a local Concurrent.ai stack via Minikube.
+Pull requests are welcome! Many details here are still being worked out – see [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
-### Testing
+Everyone contributing to Concurrent.ai repositories or engaging in discussion is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-#### Unit/Micro Tests
+## License
 
-```bash
-# model-enricher
-cd src/model-enricher && go test ./...
-
-# model-executor
-cd src/model-executor && go test ./...
-
-# rendezvous-api
-cd src/rendezvous-api && go test ./...
-
-# rendezvous-collector
-cd src/rendezvous-collector && go test ./...
-```
-
-#### Integration Tests
-
-_Coming Soon_
-
-### Contribution Guide
-
-Contributions welcome! Some general guidelines:
-- [Scannability and readability](https://www.geepawhill.org/2019/03/20/refactoring-pro-tip-i-optimize-scannability-then-readability-then-writability/) are top priorities
-- Test-driven development is encouraged but not required
-
-## Core Roadmap
-
-- Build initial Analysis Collector with support for Elasticsearch
-- Integrate Pulsar Functions to enable:
-  - Deploying non-ML business logic
-  - Creating custom model enrichers and transformation functions
-
+Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
