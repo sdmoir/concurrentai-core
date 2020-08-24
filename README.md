@@ -1,4 +1,4 @@
-![Header](https://github.com/concurrentai/concurrentai-core/raw/master/misc/images/header.png)
+![Header](https://github.com/concurrentai/concurrentai-core/raw/main/misc/images/header.png)
 
 Concurrent.ai is a platform that enables you to get started with machine learning in a rapid and evolvable way.
 
