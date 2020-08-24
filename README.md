@@ -4,15 +4,11 @@ Concurrent.ai is a platform that enables you to get started with machine learnin
 
 # concurrentai-core
 
-- [Overview](https://github.com/concurrentai/concurrentai-core/tree/readme#getting-started)
-- [Development](https://github.com/concurrentai/concurrentai-core/tree/readme#development)
-- [Roadmap](https://github.com/concurrentai/concurrentai-core/tree/readme#roadmap)
-
 ## Getting Started
 
 See **[concurrentai/concurrentai-infra](https://github.com/concurrentai/concurrentai-infra)** to start experimenting with your own Concurrent.ai stack.
 
-## Concurrent.ai Overview
+## Overview
 
 ### Background
 
@@ -38,25 +34,11 @@ All of the benefits that come along with a Rendezvous architecture: auto-scaling
 
 ![Core Components](misc/diagrams/Concurrent.ai%20Core%20Components.png)
 
-#### Rendezvous API
-
-The entrypoint for handling inference requests over HTTP/HTTPS. [Read more →](https://github.com/concurrentai/concurrentai-core/tree/readme/src/rendezvous-api)
-
-#### Model Enricher
-
-_In Progress_. Optionally transforms input data and/or provides supplemental data before processing an inference request. [Read more →](https://github.com/concurrentai/concurrentai-core/tree/readme/src/model-enricher)
-
-#### Model Executor(s)
-
-Executes the acutal inference request for each model and forwards the response. [Read more →](https://github.com/concurrentai/concurrentai-core/tree/readme/src/model-executor)
-
-#### Rendezvous Collector
-
-Receives model responses asyncronously as they are processed and returns the "active" model's response back to the API. [Read more →](https://github.com/concurrentai/concurrentai-core/tree/readme/src/rendezvous-collector)
-
-#### Analysis Collector
-
-_Not yet implemented_. Receives all model responses asyncronously and forwards them to an external system such as Elasticsearch for further analysis.
+- [Rendezvous API](https://github.com/concurrentai/concurrentai-core/tree/readme/src/rendezvous-api)
+- [Model Enricher (implementation in progress)](https://github.com/concurrentai/concurrentai-core/tree/readme/src/model-enricher)
+- [Model Executor](https://github.com/concurrentai/concurrentai-core/tree/readme/src/model-executor)
+- [Rendezvous Collector](https://github.com/concurrentai/concurrentai-core/tree/readme/src/rendezvous-collector)
+- Analysis Collector (not yet implemented)
 
 ## Roadmap
 
@@ -64,9 +46,7 @@ See the [Concurrent.ai Roadmap](https://github.com/orgs/concurrentai/projects/1)
 
 ## Contributing
 
-Pull requests are welcome! Many details here are still being worked out – see [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
-
-Everyone contributing to Concurrent.ai repositories or engaging in discussion is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+Pull requests are welcome! Many details here are still being worked out – see the [Contributing Guide](CONTRIBUTING.md) to get started. Everyone contributing to Concurrent.ai repositories or engaging in discussion is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License
 

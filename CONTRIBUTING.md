@@ -2,13 +2,9 @@
 
 Thank you for your interest in contributing to Concurrent.ai! This document is very much a work in progress, so please feel free to make suggestions about how it can be improved.
 
-## Overview
-
-Who this document is for...
-
 ## Running Locally
 
-Follow the Getting Started guide in [concurrentai/concurrentai-infra](https://github.com/concurrentai/concurrentai-infra) to run a local Concurrent.ai stack via Minikube.
+To run a local Concurrent.ai stack, follow the Getting Started guide in [concurrentai/concurrentai-infra](https://github.com/concurrentai/concurrentai-infra) for running a local stack via Minikube.
 
 ## Coding
 
@@ -42,5 +38,14 @@ _Coming Soon_
 
 
 ## Submitting a Pull Request
-- When creating your PR, target the `master` branch
-- Once tests are passing, request a review from a [Concurrent.ai team member](https://github.com/orgs/concurrentai/people)
+
+We are using [GitHub flow](https://guides.github.com/introduction/flow/) as our branching strategy (minimal structure with changes branched off of `main`).
+
+All external changes should be created from a [personal fork](https://guides.github.com/activities/forking/) of concurrentai/concurrentai-core, and then submitted as a pull request.
+
+When creating your PR:
+- Make sure to target the `main` branch
+- Include a descriptive summary of the change, a link to any issue associated with the change, etc.
+- Make sure that all tests are passing
+
+Happy coding!
