@@ -15,26 +15,59 @@ import (
 	"github.com/concurrentai/concurrentai-core/src/shared/messaging"
 )
 
-func setModelResponse(message *domain.RendezvousMessage, config *Config) error {
-	request := []byte(message.RequestData)
+// main : Runs the model executor background service
+func main() {
+	config := LoadConfig()
 
-	message.SetModelRequestStart(time.Now())
-	response, err := http.Post(config.ModelEndpoint, "application/json", bytes.NewBuffer(request))
-	if err != nil {
-		return errors.Wrap(err, "error calling model endpoint")
+	client, closeClient := createPulsarClient(config)
+	defer closeClient()
+
+	consumer, closeConsumer := createPulsarConsumer(client, config)
+	defer closeConsumer()
+
+	producer, closeProducer := createPulsarProducer(client, config)
+	defer closeProducer()
+
+	for {
+		if err := HandleNextMessage(consumer, producer, config); err != nil {
+			log.Println(err)
+		}
 	}
-	message.SetModelRequestStop(time.Now())
-	defer response.Body.Close()
+}
 
-	body, err := ioutil.ReadAll(response.Body)
+// createPulsarClient : Create a Pulsar client
+func createPulsarClient(config *Config) (messaging.Client, func()) {
+	client, err := messaging.NewPulsarClient(config.PulsarURL)
 	if err != nil {
-		return errors.Wrap(err, "error reading model response")
+		log.Fatal(err)
 	}
+	return client, func() {
+		client.Close()
+	}
+}
 
-	message.ResponseModelID = config.ModelID
-	message.ResponseData = fmt.Sprintf("{ \"results\": %s }", string(body))
+// createPulsarConsumer : Create a Pulsar consumer
+func createPulsarConsumer(client messaging.Client, config *Config) (messaging.Consumer, func()) {
+	topic := config.TopicName("model-input")
+	subscription := config.SubscriptionName("model-input")
+	consumer, err := client.CreateConsumer(topic, subscription)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return consumer, func() {
+		consumer.Close()
+	}
+}
 
-	return nil
+// createPulsarProducer : Create a Pulsar producer
+func createPulsarProducer(client messaging.Client, config *Config) (messaging.Producer, func()) {
+	producer, err := client.CreateProducer(config.TopicName("model-response"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return producer, func() {
+		producer.Close()
+	}
 }
 
 // HandleNextMessage : Execute a model request and forward the response
@@ -72,32 +105,25 @@ func HandleNextMessage(consumer messaging.Consumer, producer messaging.Producer,
 	return nil
 }
 
-func main() {
-	config := LoadConfig()
+// setModelResponse : Sets model response values on a RendezvousMessage struct
+func setModelResponse(message *domain.RendezvousMessage, config *Config) error {
+	request := []byte(message.RequestData)
 
-	client, err := messaging.NewPulsarClient(config.PulsarURL)
+	message.SetModelRequestStart(time.Now())
+	response, err := http.Post(config.ModelEndpoint, "application/json", bytes.NewBuffer(request))
 	if err != nil {
-		log.Fatal(err)
+		return errors.Wrap(err, "error calling model endpoint")
 	}
-	defer client.Close()
+	message.SetModelRequestStop(time.Now())
+	defer response.Body.Close()
 
-	topic := config.TopicName("model-input")
-	subscription := config.SubscriptionName("model-input")
-	consumer, err := client.CreateConsumer(topic, subscription)
+	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Fatal(err)
+		return errors.Wrap(err, "error reading model response")
 	}
-	defer consumer.Close()
 
-	producer, err := client.CreateProducer(config.TopicName("model-response"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer producer.Close()
+	message.ResponseModelID = config.ModelID
+	message.ResponseData = fmt.Sprintf("{ \"results\": %s }", string(body))
 
-	for {
-		if err := HandleNextMessage(consumer, producer, config); err != nil {
-			log.Println(err)
-		}
-	}
+	return nil
 }

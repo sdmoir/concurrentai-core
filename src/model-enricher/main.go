@@ -8,6 +8,61 @@ import (
 	"github.com/concurrentai/concurrentai-core/src/shared/messaging"
 )
 
+// main : Runs the model enricher background service
+func main() {
+	config := LoadConfig()
+
+	client, closeClient := createPulsarClient(config)
+	defer closeClient()
+
+	consumer, closeConsumer := createPulsarConsumer(client, config)
+	defer closeConsumer()
+
+	producer, closeProducer := createPulsarProducer(client, config)
+	defer closeProducer()
+
+	for {
+		if err := HandleNextMessage(consumer, producer); err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+// createPulsarClient : Create a Pulsar client
+func createPulsarClient(config *Config) (messaging.Client, func()) {
+	client, err := messaging.NewPulsarClient(config.PulsarURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return client, func() {
+		client.Close()
+	}
+}
+
+// createPulsarConsumer : Create a Pulsar consumer
+func createPulsarConsumer(client messaging.Client, config *Config) (messaging.Consumer, func()) {
+	topic := config.TopicName("model-request")
+	subscription := config.SubscriptionName("model-request")
+	consumer, err := client.CreateConsumer(topic, subscription)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return consumer, func() {
+		consumer.Close()
+	}
+}
+
+// createPulsarProducer : Create a Pulsar producer
+func createPulsarProducer(client messaging.Client, config *Config) (messaging.Producer, func()) {
+	producer, err := client.CreateProducer(config.TopicName("model-input"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return producer, func() {
+		producer.Close()
+	}
+}
+
 // HandleNextMessage : Enrich request data for a rendezvous request
 func HandleNextMessage(consumer messaging.Consumer, producer messaging.Producer) error {
 	defer func() {
@@ -27,34 +82,4 @@ func HandleNextMessage(consumer messaging.Consumer, producer messaging.Producer)
 
 	log.Println("published message: " + string(payload))
 	return nil
-}
-
-func main() {
-	config := LoadConfig()
-
-	client, err := messaging.NewPulsarClient(config.PulsarURL)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
-
-	topic := config.TopicName("model-request")
-	subscription := config.SubscriptionName("model-request")
-	consumer, err := client.CreateConsumer(topic, subscription)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer consumer.Close()
-
-	producer, err := client.CreateProducer(config.TopicName("model-input"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer producer.Close()
-
-	for {
-		if err := HandleNextMessage(consumer, producer); err != nil {
-			log.Println(err)
-		}
-	}
 }
