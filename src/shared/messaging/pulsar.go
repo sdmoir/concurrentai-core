@@ -13,7 +13,7 @@ type PulsarClient struct {
 }
 
 // NewPulsarClient : Create a new Pulsar client
-func NewPulsarClient(pulsarURL string) (*PulsarClient, error) {
+func NewPulsarClient(pulsarURL string) (Client, error) {
 	client, err := pulsar.NewClient(pulsar.ClientOptions{URL: pulsarURL})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create pulsar client")
@@ -22,7 +22,7 @@ func NewPulsarClient(pulsarURL string) (*PulsarClient, error) {
 }
 
 // CreateProducer : Create a new Pulsar producer
-func (client *PulsarClient) CreateProducer(topic string) (*PulsarProducer, error) {
+func (client *PulsarClient) CreateProducer(topic string) (Producer, error) {
 	producer, err := client.internalClient.CreateProducer(pulsar.ProducerOptions{Topic: topic})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create pulsar producer")
@@ -31,7 +31,7 @@ func (client *PulsarClient) CreateProducer(topic string) (*PulsarProducer, error
 }
 
 // CreateConsumer : Create a new Pulsar consumer
-func (client *PulsarClient) CreateConsumer(topic string, subscriptionName string) (*PulsarConsumer, error) {
+func (client *PulsarClient) CreateConsumer(topic string, subscriptionName string) (Consumer, error) {
 	consumer, err := client.internalClient.Subscribe(pulsar.ConsumerOptions{
 		Topic:            topic,
 		SubscriptionName: subscriptionName,

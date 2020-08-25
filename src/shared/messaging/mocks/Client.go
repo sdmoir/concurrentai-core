@@ -18,7 +18,7 @@ func (_m *Client) Close() {
 }
 
 // CreateConsumer provides a mock function with given fields: topic, subscriptionName
-func (_m *Client) CreateConsumer(topic string, subscriptionName string) messaging.Consumer {
+func (_m *Client) CreateConsumer(topic string, subscriptionName string) (messaging.Consumer, error) {
 	ret := _m.Called(topic, subscriptionName)
 
 	var r0 messaging.Consumer
@@ -30,11 +30,18 @@ func (_m *Client) CreateConsumer(topic string, subscriptionName string) messagin
 		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(topic, subscriptionName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // CreateProducer provides a mock function with given fields: topic
-func (_m *Client) CreateProducer(topic string) messaging.Producer {
+func (_m *Client) CreateProducer(topic string) (messaging.Producer, error) {
 	ret := _m.Called(topic)
 
 	var r0 messaging.Producer
@@ -46,5 +53,12 @@ func (_m *Client) CreateProducer(topic string) messaging.Producer {
 		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(topic)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }

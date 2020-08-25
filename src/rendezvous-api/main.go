@@ -16,10 +16,58 @@ import (
 	"github.com/concurrentai/concurrentai-core/src/shared/sockets"
 )
 
+// main : Runs the rendezvous API server
+func main() {
+	log.Println("Starting server")
+
+	config := LoadConfig()
+
+	client, closeClient := createPulsarClient(config)
+	defer closeClient()
+
+	producer, closeProducer := createPulsarProducer(client, config)
+	defer closeProducer()
+
+	controller := NewAPIController(producer)
+	http.HandleFunc("/", controller.HandleRequest)
+
+	log.Fatal(http.ListenAndServe(":9000", nil))
+}
+
+// createPulsarClient : Create a Pulsar client
+func createPulsarClient(config *Config) (messaging.Client, func()) {
+	client, err := messaging.NewPulsarClient(config.PulsarURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return client, func() {
+		client.Close()
+	}
+}
+
+// createPulsarProducer : Create a Pulsar producer
+func createPulsarProducer(client messaging.Client, config *Config) (messaging.Producer, func()) {
+	producer, err := client.CreateProducer(config.TopicName("model-request"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return producer, func() {
+		producer.Close()
+	}
+}
+
 // APIController : Controller for handling rendezvous API requests
 type APIController struct {
 	Producer messaging.Producer
 	Listener sockets.Listener
+}
+
+// NewAPIController : Creates a new APIController with the given message producer
+func NewAPIController(producer messaging.Producer) *APIController {
+	return &APIController{
+		Producer: producer,
+		Listener: sockets.NewUnixListener(),
+	}
 }
 
 // HandleRequest : Handle a rendezvous API request
@@ -31,14 +79,7 @@ func (controller *APIController) HandleRequest(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	rendezvousMessage := &domain.RendezvousMessage{
-		ID:          uuid.New().String(),
-		RequestData: string(body),
-		Events: &domain.RendezvousEvents{
-			RequestTimestamp: time.Now(),
-		},
-	}
-
+	rendezvousMessage := createRendezvousMessage(body)
 	producerPayload, err := json.Marshal(rendezvousMessage)
 	if err != nil {
 		log.Println(errors.Wrap(err, "error encoding rendezvous reqeuest payload"))
@@ -54,7 +95,6 @@ func (controller *APIController) HandleRequest(w http.ResponseWriter, r *http.Re
 	}
 
 	socketAddress := fmt.Sprintf("/sockets/%s.sock", rendezvousMessage.ID)
-	log.Println("Waiting for response at " + socketAddress)
 	rendezvousResponse, err := controller.Listener.Read(socketAddress)
 	if err != nil {
 		log.Println(errors.Wrap(err, "error reading rendezvous response from socket"))
@@ -66,28 +106,13 @@ func (controller *APIController) HandleRequest(w http.ResponseWriter, r *http.Re
 	w.Write(rendezvousResponse)
 }
 
-func main() {
-	log.Println("Starting server")
-
-	config := LoadConfig()
-
-	pulsarClient, err := messaging.NewPulsarClient(config.PulsarURL)
-	if err != nil {
-		log.Fatal(err)
+// createRendezvousMessage : Create a rendezvous message with the given body
+func createRendezvousMessage(body []byte) *domain.RendezvousMessage {
+	return &domain.RendezvousMessage{
+		ID:          uuid.New().String(),
+		RequestData: string(body),
+		Events: &domain.RendezvousEvents{
+			RequestTimestamp: time.Now(),
+		},
 	}
-	defer pulsarClient.Close()
-
-	pulsarProducer, err := pulsarClient.CreateProducer(config.TopicName("model-request"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer pulsarProducer.Close()
-
-	controller := &APIController{
-		Producer: pulsarProducer,
-		Listener: sockets.NewUnixListener(),
-	}
-
-	http.HandleFunc("/", controller.HandleRequest)
-	log.Fatal(http.ListenAndServe(":9000", nil))
 }
