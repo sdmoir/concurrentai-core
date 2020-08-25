@@ -34,10 +34,10 @@ All of the benefits that come along with a Rendezvous architecture: auto-scaling
 
 ![Core Components](misc/diagrams/Concurrent.ai%20Core%20Components.png)
 
-- [Rendezvous API](https://github.com/concurrentai/concurrentai-core/tree/readme/src/rendezvous-api)
-- [Model Enricher (implementation in progress)](https://github.com/concurrentai/concurrentai-core/tree/readme/src/model-enricher)
-- [Model Executor](https://github.com/concurrentai/concurrentai-core/tree/readme/src/model-executor)
-- [Rendezvous Collector](https://github.com/concurrentai/concurrentai-core/tree/readme/src/rendezvous-collector)
+- [Rendezvous API](src/rendezvous-api)
+- [Model Enricher (implementation in progress)](src/model-enricher)
+- [Model Executor](src/model-executor)
+- [Rendezvous Collector](src/rendezvous-collector)
 - Analysis Collector (not yet implemented)
 
 ## Roadmap
