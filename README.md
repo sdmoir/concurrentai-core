@@ -20,7 +20,7 @@ For a brief overview of the Rendezvous architecture and its many benefits, see [
 
 #### Reason #1
 
-Although there are many benefits that the Rendezvous architecture offers, one major drawback is how high the initial engineering effort is to implement it. With Concurrent.ai, implementing a Rendezvous architecture will be be as simple as writing a few lines of JSON.
+Although there are many benefits that the Rendezvous architecture offers, one major drawback is how high the initial engineering effort is to implement it. With Concurrent.ai, implementing a Rendezvous architecture will be as simple as writing a few lines of JSON.
 
 #### Reason #2
 
